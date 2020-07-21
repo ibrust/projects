@@ -1,0 +1,28 @@
+CHAPTER 1:
+-ECMAscript is the name of the javascript standard, it was changed for trademark reasons
+-JScript is what microsoft calls javascript, also for trademark reasons
+-the core javascript language doesn't include input/output. input, output, networking, storage, and graphics are handled by the host environment. usually this is a web browser, but not always.
+-the javascript console is an interpreter in the browser
+-console.log("..."") will display text in the console. this is often used for debugging, and less cumbersome than alert()
+-note that javascript is case-sensitive, but HTML is not. XHTML is also case sensitive.
+-when you are typing names of HTML tags, properties, or arguments in javascript to reference them, type them in lowercase
+-javascript treats character returns & other unicode characters as whitespace
+-\u followed by 4 hex digits specifies a 16bit unicode letter
+
+  /blahblah/gi   // regular expression literal
+  {x:1, y:2}     // object literal & initializer
+  [1, 3, 2]      // array literal & initializer
+
+-variable names can begin with $ or _
+-the following predefined global variables should not be used as variable names: arguments, Error, Infinity, JSON, Number, RegExp
+-javascript treats a newline as a semicolon only if the code on the next line cannot be interpreted as a continuation of the current line. this can lead to errors such as:
+  var y = x + f
+  (a+b).toString()           // without semicolons, the f is interpreted as preceding the (a+b)
+
+-statements that begin with:  ( [ / + -  all can be interpreted incorrectly if you don't use semicolons.
+-some programmers actually place preceding semicolons before such statements to prevent code modification from introducing an error:
+  ;[x,x+1,x+2].forEach(console.log)
+
+-
+
+page 30

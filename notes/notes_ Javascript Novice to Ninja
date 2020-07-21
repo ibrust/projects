@@ -1,0 +1,442 @@
+CHAPTERS 1-5, GENERAL SYNTAX:
+
+-for a text editor, try: E text editor (works on both windows and linux)
+-for an IDE, try: Coda
+-ctrl shift K opens javascript console in firefox, ctrl shift J opens javascript console in chrome
+-this function prints something to the console (appears to just be the actual console you opened in the browser):
+	console.log("hello world!");
+
+-originally javascript used to be entangled with HTML in the code. now it's placed within script elements. That keeps it separated from HTML /CSS. You try to keep these 3 separate
+-script tags w/ src attribute link to javascript files in separate directories, & will execute them.
+-the legacy attribute "language='javascript'" is no longer necessary in HTML5
+-the id attribute in various HTML5 tags is often used by javascript to anchor to certain areas in the code.
+-This is the javascript alert function, it will pop up a primitive window displaying the text:
+	alert("message")
+
+-though javascript uses automatic semicolon insertion at the end of code lines, it's error prone in some cases and better to manually insert them.
+-the typeof function will return the type of the parameter (constant or variable):
+	typeof parameter;
+
+-var is used to declare a variable.
+	var variable_name;
+
+length is a property of type string, it contains the length of the string. properties can also be accessed with the bracket notation:
+	stringname.length
+        stringname['length']
+
+-other basic string methods / properties:
+        stringname.toUpperCase();
+        stringname.toLowerCase();
+        stringname.charAt(3); 			// access 3rd character in string
+        stringname.indexOf("L"); 		// find index of the characters first occurence; returns -1 if not found
+        stringname.lastIndexOf("L"); 		// find last occurrence
+        stringname.concat("string2");		// an alternative to + for concatenation
+        line.trim();				// removes whitespace from beginning and end of line, but not the middle
+
+-new operator w/ type syntax:
+	var x = new String("");
+	var y = new Number(7);
+
+-using new with constructors is more verbose than just assigning the variable to a constant, and it's not clear why we need to use new - I thought all variables were heap dynamic in javascript. perhaps new is for use with objects and they wanted to remain consistent w/ C++. Find out more about this.
+-number methods:
+	var pi = 3.1415926;
+	pi.toFixed(3);											// 3.141 specifies total decimal places & rounds the number
+	var x = 3.1415926.toPrecision(3);		// 3.14 specifies number of ~significant digits~ and rounds (includes numbers to left of decimal)
+	-4 % 3; 														// this is -1. It performs modulus in the reverse direction, unlike C++ & other languages
+
+-Infinity & NaN are types, though javascript has a massive max size for numbers
+	"hello" * 5;				// NaN result.
+
+-javascript has permissive but unpredictable type coersion:
+	"2" * 8;				// 16 result.
+	"2" + 8;				// "28", the two were concatenated
+
+-type conversion tricks & shortcuts:
+	"5" * 1;				// converts "5" to int
+	variable = +"5";			// converts "5" to int
+	3 + '';					// converts 3 to string
+
+-the toString(int base) method:
+	7..toString(2); 			// result: "111" - it converted int 7 to a binary seven string. binary was specified by the base 2
+
+-The two decimals clarify it isn't a decimal point. This syntax is used for methods on numbers.
+-the max base in toString is 36
+-parseInt takes the front number of a string and lops off the rest, useful for addresses & other things. parseInt truncates all floating point values, however:
+	var address = "134b Barker Lane";
+	var x = parseInt(address, 10);				// x = 134
+
+-null is coersed to 0 where necessary (in mathematical expressions), undefined is not.
+-These values coerce to boolean false: "" '' 0 NaN false null undefined
+-notice undefined is indeed coerced to false.
+-remember these bitwise operators work on the underlying binary: ~ (not), ^ (xor), &, |, <<, >>
+-the === operator is supported (comparison w/ no type coersion)
+	NaN === Nan 				// false - this is the only such case in javascript, NaN != NaN
+	isNan(Nan)				// true - isNaN was written specifically to address this issue
+
+-the == operator can yield strange comparison results, beware:
+	false == "0";				// true
+	true == "1";				// true
+	true == "2";				// false
+	"true" == true;				// false
+	null == undefined; 			// true
+
+-take special note of the last line, that null == undefined evaluates to true. that is a dangerous typechecking problem.
+-the prompt function gets input from user:
+	var string = prompt("");
+
+-some array syntax:
+	var arrayname = [];			// creates an empty array
+	arrayname[0] = "fred";
+	arrayname[3] = "john";			// now contains ["fred", undefined, undefined, "john"]
+	delete arrayname[3];			// now contains ["fred", undefined, undefined, undefined]
+	var newarray = {"joe", "fred", "jacob"};
+
+-as you can see, if the array expands beyond its current limit it adds "undefined" elements in all places.
+-delete does not remove elements, it just changes them to undefined.
+-arrays can have mixed data types
+-arrays also have a length property:
+	array.length;
+	array[array.length - 1];		// access last element
+
+-you can change / adjust the size of an array like this:
+	array.length = 3;
+	array.pop();				// returns last item of array & shrinks array
+	array.push(element);			// adds item to end of array & returns the ~new length~ of the array (not the last index)
+	array.shift();				// same as pop, but for front of array
+	array.unshift(element);			// same as push, but for front of array
+
+-the concat method returns a new array from two arrays:
+	var newarray = array1.concat([1, 2, 3, 4]);
+	array1 = array1.concat(array2);
+
+-the join method combines all the array elements into a string separated by a specifier:
+	var array = ["joe", "fred", "bob", 1, 2];
+	var string1 = array.join();			// the default specifier is commas w/ no space. this returns "joe,fred,bob,1,2"
+	var string2 = array.join(", ");			// returns "joe, fred, bob, 1, 2"
+
+-the slice method for arrays:
+	array.slice(2, 4);			// this returns a slice starting at element 2, and discludes element 4.
+
+-the splice method for arrays is used for simultaneously removing and inserting chunks of elements:
+-splice can also be used for typical inserts with no deletion:
+-splice can also remove an element completely from a list (unlike the delete operator), adding nothing:
+	array.splice(2, 1, "joe", "fred", "bob");	// starting at index 2, 1 element is removed. Then the following 3 arguments are then inserted at index 2.
+	array.splice(3, 0, "joe");
+	array.splice(2, 0); 				// in the special case where no element is added, splice returns an array containing the removed element, apparently
+
+-misc array methods & operators:
+	array.reverse(); 				// in place reverse
+	array.sort(); 					// in place sort, only works on arrays
+
+	callback_function = function(a, b){return a-b;};
+	...						// with an optional callback function as a parameter, sort can work on numbers, apparently. strings of numbers or digits?
+	array.sort(callback_function);			// you must define the callback function yourself. For numerical sort it will be this function
+
+	element in array;				// the in operator can search an array for an element & return true / false
+	array.indexOf(element); 			// returns the index of the first occurrence of the element, or -1 if not found
+
+-javascript supports multidimensional jagged arrays, though the depth of all elements must be consistent:
+	var array = [[1, 2], ["john, "fred", 3, 4], [7], []];
+	var element = array[2][0];
+
+-all the typical C loops & conditionals are included; including the ternary, do while, & switch statement (which falls through):
+	condition ? statements : statements;
+	switch (number) {
+	case 1:
+		statements;
+		break;
+	case 2:
+		statements;
+		break;
+	default:
+		statements;
+	}
+	do {
+		statements;
+	} while (condition)
+
+-functions are first class objects. you can define functions within other functions, put functions in arrays, assign them to variables, etc.
+-3 ways to define a function: declarations, anonymous functions, and function constructors
+-in declared functions, the function keyword precedes the name
+-in anonymous functions, the function is assigned to a variable and not given a name. note the anonymous function has a semicolon at the end
+
+	function hello(){ 							// declared function
+		statements;
+	}
+	var variable = function(){statements;};					// anonymous function
+	var variable = new Function("function definition as a string"); 	// function constructor. check the syntax. perhaps useful for working with JSON?
+
+-functions have attributes since they are first class objects. function.name is an attribute all functions have. for anonymous functions, function.name is undefined initially. anonymous functions can also be reassigned to new variables:
+	var variable = function();
+	variable.name;					// "" or undefined
+	var newvariable = variable; 			// variable without () returns the definition of the function and can be used in assignment
+
+-if a return value is not specified, the function defaults to returning undefined
+-parameters are not typed
+-if a function is called with too few arguments, the missing ones will be made undefined. if invoked with too many, the extra will be ignored. It will still run.
+-every function has a special variable called arguments. This is an object that's similar to an array but lacks the array methods. It does have a length property. It holds all the arguments sent into the function. It can be invoked within the function. *look more into this, find the syntax & purpose; it might be used for variable length arguments but I'm not sure*
+-default parameters must be emulated with code below. Typically these only work when the omitted parameters are at the end of the parameter list. However, if undefined is supplied as an argument elsewhere in the parameter list, a similar effect can be achieved, though this is fairly unnecessary.
+	if (parameter === undefined) parameter = defaultvalue;
+
+-if you create a variable inside a function without using the var keyword (no specifier whatsoever), it will make it a global rather than local variable.
+-variable declarations lower down in functions are treated like they exist (hoisted up), but their value remains undefined until execution reaches the actual assignment statement.
+-functions are also hoisted in any scope that they're defined (so no prototyping is necessary). there are 2 rules for function hoisting:
+	1) if a function declaration was hoisted, the function can be invoked and used prior to its declaration.
+	2) if an anonymous function assigned to a variable is hoisted, it's treated the same as a typical hoisted variable and remains undefined prior to assignment statement.
+-a callback function is a function passed as a parameter to another function. This is possible because they're first class objects.
+-you can pass a variable assigned to a function (either anonymous or defined), or you can write an anonymous function within the argument list and pass that.
+-when you pass a variable, you don't use the () notation - you're just passing a reference to the function.
+-if you define an anonymous function in the argument list, note that you do not include the semicolon at the end of the anonymous function. also, remember that you will never define an anonymous function withing a function definition - only within an argument list.
+	defined_function = function(x, callback)
+	{
+		return x - callback(17, 3);
+	}
+	var result = defined_function(33, function(a, b){return a - b;});	// note: semicolon is not at end of anonymous function within the argument list
+
+-if you want to typecheck the parameter of the callback function, this can be done with the following code:
+	if (typeof callback === "function"){ ... }
+
+-A number of array methods utilize callback functions in a way that increases the arrays functionality: forEach, map, reduce, filter.
+-array methods can also be called directly on array literals such as: [1, 2, 3, 4].method();
+-the forEach method easily iterates through an array. 3 arguments to the callback function will be necessary - element, index, array:
+	array.forEach(callback(element, index, array){ statements; });
+
+-the map method also iterates through the array, but it returns a new array consisting of all the return values of the callback function.
+-with map you can easily construct arrays of objects, strings, etc. from the initial array using the custom callback function:
+	["red", "green", "blue"].map(function(color){return ",p>" + color.toUpperCase() + " </p>";});
+	["red", "green", "blue"].map(function(color, index, array) {return index + ": " + color + " (length " + array.length + ")";});
+
+-the reduce method also iterates through the array, but it combines all the elements in a way specified by the callback function and returns the totalled result. this callback function needs 2 parameters - prev & next:
+-on the first iteration through the array, prev is the initial element. On the second iteration, prev remains that element and next is the current element.
+	array.reduce(callback(prev, next){ return prev + next; });
+
+-reduce can take a 2nd parameter, initialvalue. This will set prev to an initial value before the summation begins. So the combination will not always start at nothing:
+	array.reduce(callback(prev, next), initialvalue);
+
+-map & reduce are often chained. because map returns the transformed array, reduce is placed at the end. here's a sum of squares calculation. map squares the elements, then reduce sums:
+	[1, 2, 3].map(square).reduce(function(total,x) {return x + total;});
+
+-the filter method also iterates through an array. It will return an array consisting of all the elements that return as true after being passed through the callback.
+	numbers.filter(callback(element){ return element % 2 === 0; }
+
+-other popular array methods that use callbacks which the book does not describe: reduceRight, every, some.
+-arrays and functions are predefined objects. there are also object literals.
+-an object literal is an object created directly in the code, like an anonymous object. it looks like a dictionary, really.
+-object properties & functions are mutable throughout the code.
+-note the syntax for declaring properties - key value pairs separated by commas:
+	var variable = {} 		// a pair of curly braces creates an object literal, this one is empty
+	object.newproperty = x;
+	var variable = {name: "joe", height: 73, weight: 230, function(){statements;}};
+
+-object properties can be accessed via object['property'] or object.property
+-some properties don't follow the proper naming conventions, like "astring" being the property name, and the only way to access these is with the bracket notation.
+-object methods can also be called via object.method() or object['method']()
+-the in operator can check if an object has a property:
+	"property" in object; 		// "" around the property are required
+-another way to check is:
+	object.property !== undefined;
+
+-the for in statement can loop through all properties and methods of an object:
+	for (var key in object){ statements; }
+
+-when doing this you must check if the properties belong to the object itself and not some nested function or object:
+	if (object.hasOwnProperty(key)){more statements;}
+
+-you can also remove properties from the object using delete, which works completely in this case, unlike with arrays:
+	delete object.property;
+
+-you can create a nested object in an object literal
+-these are accessed w/ multiple dots or multiple brackets:
+	object = {objectname: {property: x, property2: y}, objectname2: {property: w, property2: z}};
+	object.objectname.property;
+	object['objectname']['property'];
+
+-objects can also be passed as parameters to functions.
+-you can also hard code default parameters with short circuit evaluation:
+	function name(object){
+		object = object || {}; 					// if object evaluates to false, than the empty list is assigned
+		var variable = object.property || "default name";	// if the objects name evaluates to false, than the default property name is assigned
+		return variable;
+	}
+
+-you don't have to pass default arguments at the end with the above method (good for use w/ long parameter lists)
+-with hard coded short circuit evaluation, you must be careful not to pass objects with meaningful properties that evaluate to false
+-JSON (javascript object notation): converts an object to a string for storage & transmission across networks
+-JSON objects cannot contain functions (i.e. methods), only properties. also, the property names must be quoted strings.
+	var object = '{"property_1": "value_1", "property_2": "value_2", "array1": ["Joe", "Fred"]}'
+
+-the parse method takes a JSON object string and returns the original javascript object
+	JSON.parse(json_object);
+
+-the stringify method takes a javascript object and generates a JSON object, ~discarding any methods~
+	JSON.stringify(javascript_object);
+
+-JSON & these methods are typically used when passing data to and from a web server using AJAX or when using local storage:
+-there is a Math object in Javascript with a number of properties:
+	Math.PI
+	Math.SQRT2 		// phi
+	Math.SQRT1_2 		// reciprocal of phi
+	Math.E
+	Math.LN2
+	Math.LN10
+-Loop through the Math objects properties in the console on an as needed basis to remember them all
+-the Math object also has a number of predefined methods:
+	Math.abs()
+	Math.ceil(float)
+	Math.floor(float)
+	Math.round(float)
+	Math.exp(int)		// raises a number to power of E
+	Math.pow(num, exp)
+	Math.sqrt(int)
+	Math.log(num)		// returns natural log)
+	Math.max(num1, num2, num3)
+	Math.min(num1, num2, num3)
+-Math also has trigonometric methods (which use radians):
+	Math.sin(radians)
+	Math.cos(radians)
+	Math.tan(radians)
+	Math.asin(radians)
+	Math.acos(radians)
+	Math.atan(radians)
+
+-remember these numbers are not scientifically precise, they are still subject to all the limitations of computer arithmetic
+-the Math object has the random() method that returns a value in the range of [0, 1). You can combine it with floor method for a random integer:
+	var number = Math.floor(Math.random * ceiling + 1);
+
+-There's also a Date constructor to create a date object
+-The Date constructor takes a string for a date. This string can be in a wide range of formats. For simplicity you can also provide the dates as separate arguments:
+	dateobj = new Date('date_string');
+	dateobj2 = new Date(year, month, day, hour, minutes, seconds, milliseconds);
+
+-If you only initialize Date() w/ one integer argument it will assume it's a timestamp (milliseconds since epoch) and initialize a full date that corresponds to that timestamp:
+	Date(timestamp);
+
+-To display the date, call the function toString() on the object. Note that toString() is a function for any object in javascript, not just date objects:
+	dateobj.toString(); 		// return the date as a string
+
+-Getter / Setter functions for the Date object are also included for both UTC and local timezones:
+	dateobj.getYear();
+	dateobj.getFullYear();		// for post-Y2K
+	dateobj.getUTCHours();
+	dateobj.setMinutes();
+	dateobj.getTime(); 		// returns a timestamp for the current time
+	dateobj.setTime(timestamp);
+
+-Javascripts regular expression patterns are the same as Perl's
+-A regular expression object can be created in two ways:
+	var pattern = /\w+ing/;
+	var pattern = new RegExp('\w+ing');
+
+-the created pattern has a few methods that take a string argument & perform searches on it:
+	pattern.test(input_string); 			// test the pattern against the input string, return true or false
+	pattern.exec(input_string);			// put first instance of the pattern found in an array & return the array
+
+-the pattern can have special meaningful characters that change the search behavior:
+	g	// global specifier, the object will search for all instances of its pattern, not just the first.
+	i 	// ignoreCase, your search will ignore upper/lowercase
+	m	// multiline, search will not stop at the end of a line - by default it does
+
+-use a special character by specifying it after the delimiters:
+	var pattern = /\w+ing/g;
+
+-study Perl expressions for further details. there's more syntax such as [], and metacharacters such as ., \w, \s, and much more.
+-there are also string methods that will accept regex's as parameters:
+	string.split(/\s+/);		// split the string on any whitespace. it uses the regex as a delimiter. it returns an array of the split.
+	string.match(/aeiou/g);		// return an array of all the vowels. match returns an array of one or all matches (if you set g)
+	string.search(/Java/i);		// search a string for any instance of java regardless of case
+	string.replace(/aeiou/ig, "*");	// replaces all vowels with *. it will replace all instances of the pattern with the second argument. It returns a new string.
+
+
+________________________________________________________________________________________________________________________________________________________________________
+CHAPTER 6, THE DOCUMENT OBJECT MODEL:
+
+-the DOM is a tree of elements, attributes, & content. the root of the tree is the <html> tag
+-the DOM is not part of javascript, it's an API that javascript interacts with via the document object
+-the DOM API is continuously updated; this book was written when DOM level 3 was slowly transitioning to DOM level 4. Browsers gradually come to support the new version
+	var body = document.body;					// you can directly access different types of elements in the DOM tree
+	typeof(body);										  // this is an element object
+	body.nodeType;									  // returns 1, an integer code for element type object.
+	body.nodeName;										// returns BODY, the elements name
+
+-the nodeType method returns int codes that indicate what type of object it is: 1 element, 2 attribute, 3 text, 8 comment, 9 document
+-there are other nodeType codes for things not used in HTML documents, apparently
+-the old DOM level 0 had some useful basic attributes: document.body, document.images, document.links, document.anchors, document.forms
+	var body = document.body;
+	document.images;										// returns a list of all image objects
+	document.links;											// returns a list of all <a> and <area> elements with href attributes
+	document.anchors;										// returns a list of all <a> elements that have a name
+	document.forms;											// returns a list of all forms
+
+-you can use [] and length on the lists returned by level 0 DOM attributes, but you can't use any other array methods like slice, splice, etc.
+-the following document methods get elements:
+  document.getElementById("unique_id"); 							// if no element, returns null
+  document.getElementsByTagName("element_type"); 			// returns empty list / length 0
+  document.getElementByClassName("class_name");				// returns empty list / length 0
+	document.querySelector("CSS_selector"); 						// returns null
+	document.querySelectorAll("CSS_selector");					// returns empty list / length 0
+
+-internet explorer 8 apparently only understands CSS2 selectors in the query functions above
+-jQuery apparently is a good way to access elements with cross-browser compatibility, it often uses the querying selectors internally but not always
+-elements have a variety of properties to navigate up / down / across the DOM tree: childNodes, children, firstChild, lastChild, parentNode, nextSibling, previousSibling
+	var el = document.getElementById("unique_id");
+	el.childNodes;																		// returns array-like object of all children; includes non-elements like text / whitespace
+	el.children;																			// returns array-like object of all child elements; discludes non-elements like text / whitespace
+	el.children.length;
+	el.firstChild;
+	el.lastChild;																			// includes text / whitespace. often it's whitespace returned and not an element.
+	el.parentNode;																		// always another element.
+	el.nextSibling;
+	el.previousSibling;																// includes text / whitespace.
+
+-whitespace is counted as text, the DOM is full of text nodes including whitespace nodes.
+-there are methods for accessing the text of an element: nodeValue, textContent / innerText
+	<p id="unique_id">text</p>
+	var el = document.getElementById("unique_id");
+	var text = el.firstChild;																// first you must find the text node itself if you use the nodeValue method
+	text.nodeValue;																					// nodeValue is called off the text element & returns its text
+
+	el.textContent;																					// textContent directly returns the text of the element.
+																															// in internet explorer 8 this method is instead called innerText because microsoft is a shit company
+
+-DOM element objects also have getter / setter methods for changing an elements attributes:
+	el.getAttribute("id");
+	var meta = document.getElementByTagName("meta")[0];
+	meta.getAttribute("charset");														// returns utf-8
+	el.getAttribute("does_not_exist"); 											// returns null
+	el.setAttribute("class", "class_1");
+
+-the old way of accessing DOM element attributes was the dot notation. class and for are keywords, so className and htmlFor are used for those attributes.
+-classList is also part of this old DOM syntax. It returns a list of the multiple classes an element has. It has methods: add, remove, toggle, contains:
+ 	el.id;																									// get the elements id
+	el.className = "class_2";																// set the elements class
+	el.classList.add("class_1");
+	el.classList.remove("class_2");
+	el.classList.toggle("class_2");													// toggle returns a boolean indicating if the class was added or removed
+	el.classList.contains("class_2");												// returns boolean
+
+-internet explorer 9 and below does not support classList, so you must use custom polyfill/shim functions for it. the following function imitates classList.add:
+	function addClass(element, class){
+		if (element.className){
+			element.className = element.className + " " + class;
+		} else {
+			element.className = class;
+		}
+	}
+
+-a polyfill is code that performs the function of a new feature but implemented with the old syntax. it can be used to add functionality to out of date browsers
+-shem is a library of polyfills available for ECMAscript 5 or 6
+-transpiling is a way of converting new syntax into old code for compatibility. Traceur is a decent javascript transpiler that converts ES6+ into ES5
+-the DOM is an example of a host object. these are objects not part of javascript but provided by the host environment.
+-all the document methods are actually DOM APIs provided by the browser (document.getElementById(), etc.), not the javascript engine
+-alert/console.log are also provided by the browser, not the javascript engine
+-
+
+
+
+-page 160, start of new section
+
+
+QUESTIONS:
+-why would you ever use new to initialize dynamic memory if all memory is heap dynamic in javascript, isn't it simpler just to assign the variable to a constant
+-array.sort(callback_function_parameter);	// with an optional callback function as a parameter, the method can work on numbers, apparently. strings of numbers or digits?
+-every function has a special variable called arguments. This is an object that's similar to an array but lacks the array methods. It does have a length property. It holds all the arguments sent into the function. It can be invoked within the function. *look more into this, find the syntax & purpose; it might be used for variable length arguments but I'm not sure*

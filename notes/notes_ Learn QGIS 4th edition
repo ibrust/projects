@@ -1,0 +1,23 @@
+CHAPTER 1: 
+-for Windows, install OSGeo4W; it's a package that bundles QGIS w/ other things including GRASS and SAGA; advanced install can specify version
+-Investigate installing SAGA on Linux (system for automated geoscientific analysis)
+-for Linux: add the right lines to your source list - this varies depending on the version of Ubuntu you're using. example is: "deb  https://qgis.org/debian stretch main" (probably differs for bionic); then same URL w/ "deb-src" instead of deb. 
+-next add qgis.org repository's public key to your apt keyring. There's 3 commands starting w/ "wget", "gpg --fingerprint", and "gpg --export --armor" ... " | sudo apt-key add -" ... for more information, http://www.qgis.org/en/site/forusers/alldownloads.html#debian-ubuntu or related for information
+-after doing these things, install qgis on linux with: "sudo apt-get update" then "sudo apt-get install qgis python-qgis qgis-plugin-grass"
+-for fresh install, click toolbars & enable all default toolbars
+-there's also an 'upgrade all' option for all the plugins
+-view > panels > processing toolbox will bring up the analysis tools panel
+-plugins added will often add functionality to the upper menu
+-digitizing, shape digitizing, and advanced digitizing toolbars: they contain tools related to creating & editing features (including a geometry simplification tool)
+-data source manager toolbar: buttons to quickly create new shapefiles & scratch layers apparently
+-the bottom bar (information bar) lists the current coordinate, scale, projection, & other things
+-you can drag things from the browser tree window into the layers window below it, apparently
+-useful help sites: http://gis.stackexchange.com/questions    IRC: http://webchat.freenode.net/?channels=#qgis
+-QGIS is built on the GDAL library for rasters and OGR library for vectors, apparently 
+-GeoTIFF is the most common format for rasters; shapefiles are most common for vectors; but a new alternative in QGIS is GeoPackage (.gpkg). 
+-.gpkg need only one extension, unlike shapefiles that use several, apparently (.db, .shp, & others...?)
+-the zoom allows you to click-drag box the area to zoom, apparently
+-
+
+
+page 33

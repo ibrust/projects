@@ -1,0 +1,210 @@
+goal: 10 pages a day or more
+
+CHAPTER 1: DATABASE SYSTEMS
+-large amounts of data that doesn't require high levels of integrity and consistency can potentially be stored in unstructured databases
+-in-memory databases are another kind of database becoming popular: they give faster performance for business intelligence that's time-sensitive
+-cloud computing is also developing as an alternative to company owned server clusters
+-information: data that's been processed to reveal its meaning
+-knowledge: understanding of information in a relevant context; new knowledge can be derived.
+-data management: the proper generation, storage, & retrieval of data
+-databases store end-user data and metadata. Metadata is data about data. end-user data is raw data that is of interest to the database user. metadata describe the characteristics and relationships of the data.
+-DBSM provides an interface to the database, & various applications / people can interact with the unified interface. DBSM receives all application requests and translates them into complex operations needed to fulfill them.
+-DBSM allow data sharing between users, & provide security, data entry consistency, and query response.
+-single-user database (one user at a time, i.e. desktop database); multiuser database (workgroup database ~ 50 or less people / single department typically; enterprise database - beyond that / multiple departments)
+-centralized database - the data is located at a single site; distributed database - data is located at different sites
+-discipline specific databases: specialized databases such as GIS databases, financial databases like CRSP, medical databases with confidential info. Contrast with general-purpose databases
+-most popular way of classifying databases: how they will be used and the time sensitivity of the data.
+-operational database (also called OLTP for online transaction processing; transactional; or production database): specific type designed to support a company's everyday operations
+-analytic database: focus rather on storing historical data used for strategic / analytic purposes (contrasted with operational databases); supports advanced data analysis
+-usually analytic databases store information in a data warehouse and use an OLAP (online analytic processing) front end. The OLAP is a set of tools / environment for the data analysis
+-semistructured data: data that has been partially but not fully processed
+-XML (extensible markup language): used to manipulate the data elements of HTML
+-XML databases (related to semi-structured and unstructured data): supports semistructured XML data - i.e. company emails, web pages, memos, etc.
+-database design is important for company efficiency; good database design is a process of decomposing data into multiple tables that can be pieced together coherently
+-early digital file systems, as the system grows large, run into problems with overlapping data across multiple files: keeping it all updated and consistent, not repeating things, and so on.
+-early digital file systems (pre DBMS) also left a schism between the everyday business people working with the data and the computer specialists managing the file system. This led to personalized computers, but this leads to even more consistency problems
+-more problems with early digital file systems:
+    data retrieval and manipulation required extensive programming and time (no ad hoc queries), whereas now we have SQL (which is non procedural)
+    complexity of managing such a system as it continues to grow larger (including all the report generating programs written for it)
+    difficult to enforce security and also share data across locations effectively; this in turn incentivizes islands of information forming and data redundancy and anomalies
+    extensive coding is data dependent (a type of structural dependence); many coding dependencies tend to break as file systems are changed
+-The DBMS & the application programs / utility software are distinct. The application programs / utility software (like a GUI for the DBMS) generate reports and help manage the database. Apparently programmers still write programs to do this kind of thing
+-Important functions of a DBMS:
+    1) data dictionary management - a lookup system for the data (built with metadata), it provides abstraction and prevents dependency
+    2) data storing - databases handle storing the data (performance tuned) and also any code / programs used on the data.
+    3) data transformation / presentation - automatically changes data into different forms for input, storage, and output
+    4) security - access levels and passwords
+    5) multiuser concurrent access management
+    6) data backup / recovery functions
+    7) input data integrity enforcement
+    8) programming interfaces - SQL and APIs for other languages such as C, Java, Visual Basic; plus administrative programs for DBAs to use
+    9) database communication interfaces - there are different interfaces from which people can connect to the database, and the DBMS can facilitate all of them
+-though DBMSs & databases are superior to file systems, there is overhead in running and maintaining one for a company
+-popular big data databases: cassandra, bigtable; popular in memory databases: solidDB, TimesTen; popular cloud databases: none specified
+____________________________________________________________
+CHAPTER 2: DATA MODELS
+-Data modeling is the first critical step in designing a database. It is like the blueprint to a house. There are many different viewpoints within an organization; different ways of seeing the data, all which must be accommodated.
+-There are a variety of database models that evolved over time: hierarchical / network model, relational model, entity relationship model, object/relational model, NoSQL model.
+-data models consist of 4 building blocks: entities, attributes, relationships, and constraints
+    entities: the rows; entity sets are single rows. entities and entity sets are sometimes wrongfully used interchangeably
+    attributes: the columns, also called data fields
+    relationships: 1 to many, many to many, 1 to 1; describes association between entities (or entity sets?). A central concept of relational databases
+    constraints: restriction placed on the data, also known as a rule - ensures data integrity
+-1:M, M:M, 1:1 are also representative of relationships between entities in SQL code
+-note that the relationships are bidirectional. 1:M can be flipped to be M:1
+-before creating a model, it is necessary to clearly delineate all the business rules. These are rules that describe how the organization must operate, which can be expressed using the 4 data model building blocks. For example: each employee may order 1 lunch under 5 dollars on break; customers may place up to 30 invoices; etc.
+-you typically get the rules from managers (assuming they know what's going on) and company policy documents
+-not all business rules can be modeled, apparently; i.e. "no pilot can fly 10 hours within a 24 hour period" can't be modeled, the author claims. This rule would have to be enforced w/ application software
+-often times the nouns in the business rules are entities while the verbs are relationships, apparently
+-in identifying relationships in the business rules, think about the relationship in both directions
+-entities and attributes must be well named; and often attributes incorporate their entities name into them; i.e.: entity CUSTOMER w/ attribute CUS_CREDIT_LIMIT
+-types of models of databases have evolved over the years as databases have evolved
+-the evolution of database models has been: file system > hierarchical and network > relational > object relational > XML / Hybrid DBMS > Key-value store / Column Store (NoSQL)
+-hierarchical model: developed in 60s, a tree of 1:M relationships between root / leaves
+-network model: still hierarchical, but child nodes can have more than one parent node. concepts of schema, subschema, DML (data manipulation language), DDL (data definition language) were derived from the network model
+-schema: the conceptual organization of the database from the admins viewpoint
+-subschema: part of the schema that's being interfaced with by a given application
+-DML (data manipulation language): used to work with the database, defines how the database can be worked with
+-DDL (data definition language): allows you to create & define the schema
+-lack of ad hoc querying and data dependence led to hierarchical & network models being replaced by the relational model
+-relational model: invented in 70s, became popular as computing power grew. tables are called relations, each row is a tuple, each column is an attribute
+-RDBMS (relational database management system): implements the relational database by performing the same functions as hierarchical & network DBMS's plus additional functions; relational models require more overhead
+-the advantage of the relational model is its ability to hide the relational models complexity from the user. The user sees the database as a collection of tables, all the implementation details are managed by the RDBMS. the user can intuitively manipulate / query information
+-tables are related via common attributes
+-1:1, 1:M, M:M <--- the author says these are often used in relational schema (but later the author says M:M aren't appropriate in a relational model or diagram, and he'll elaborate in Chapter 3)
+-a relational diagram consists of boxes with lists of attributes within, & connections between the boxes. The connections have 1:1, 1:M, M:M tags
+-note that tables preserve data independence: the table is just a logical relationship, the data can be stored independently of the table
+-relational databases use SQL which lets the user interface with the tables without handling data directly, preserving data independence. RDBMS's manage the implementation details
+-The RDBMS has an SQL engine built into it
+-SQL is a declarative language: an application (can be code or GUI) that uses SQL has logic involving the database schema, while the RDBMS implements the details behind the scenes
+-ERM (entity relationship model): data modeling method that was combined with relational modeling for use in designing relational databases, produces ERD's (entity relationship diagrams)
+-the entity, attribute, relationship, constraint language used earlier relates to ERM & ERD's
+-entities are the rows in the table, single rows are also called entity instances, and an entity set is a set of related rows or a table. ERD's typically model entity sets
+-relationships (line connections) use 1:M, 1:1, M:M; the author claims M:M relationships are not appropriate in a relational model but does not elaborate, says read chapter 3; yet he did draw a diagram w/ an M:M connection
+-there are 3 ways of drawing ERD's: crow's foot notation, chen notation, & class diagrams (part of UML). Chen notation is the squares / diamonds. note that diamonds are supposed to be relationships
+-object-oriented data model (OODM): data & their relationships are bundled together in objects & managed with an object oriented database management system (OODBMS)
+-OODM differs from RDM in that an objects attributes are given internal relationships; OODM is a semantic data model
+-an object is analogous to an entity; it's a single occurrence of an entity w/ unique semantic content
+-a class of objects is analogous to an entity set; but the class has private member functions
+-the OODM model supports inheritance
+-UML class diagrams are used to represent the OODM
+-The OODM allows for a larger representation of complex objects, it apparently scales well
+-ERDM (extended relational database model) evolved out of RDM as a response to OODM. It added a variety of OO concepts but maintained the simplicity of the relational model
+-O/R DBMS (object relational database management system) is the evolved RDBMS used for ERDM. O/R DBMS is the most popular type of DBMS at the present time
+-OODBMS's are used in places where complex objects are needed, such as GIS, CAD, simulations; otherwise O/R DBMS's are typically used
+-as the internet took off, XML (extensible markup language) emerged as a standard for managing databases of internet related information such as web pages, emails, word processing documents, diagrams & other things. OODBMS's incorporated support for XML into their systems
+-Big Data: a movement to manage large amounts of web-related data & derive business insight from it while simultaneously providing high performance & scalability at low cost
+-browsing patterns, purchasing history, customer preferences, behavior patterns, social media data are a few sources of business intelligence on consumers
+-O/R DBMS's are insufficient for handling big data: the data is often unstructured & difficult to fit in rows & columns, would require too much storage space & processing power to handle, the models analysis tools are not suited for unstructured data
+-NoSQL databases address these problems
+-there is not a standard model that's yet established for NoSQL databases, there are competing ones: document databases, graph stores, column stores, key-value stores
+-key-value stores and column stores appear to be the early leaders. These models apparently originated from functional languages like LISP, but focus on storage
+-key-value stores model: one table has 3 columns, a unique id, a key, and a value. each row now represents a single attribute
+-in contrast to relational models, the key-value model is schema-less: to add a new attribute you do not need to modify the table definition, you merely add a new row & define the new attribute there. It is a formless way of doing it
+-NoSQL databases are particularly suited for sparse data: large number of attributes with many unfilled data fields
+-NoSQL databases do not store or enforce relationships among entities. The programmer manages relationships in program code. Also there is no data integrity enforcement, the programmer must handle that also.
+-NoSQL databases have their own APIs, & do not use SQL. Because of this, the programmer must handle how to access the data - there is no declarative system handling the data access
+-indexing and search are difficult with NoSQL: the value is unformatted
+-column stores: BigTable & Cassandra have extended the key-value model to group multiple key-value sets into column families or column stores
+-NoSQL databases are generally designed to work well on distributed systems, which saves money. They have built in fault tolerance, i.e. if one node dies the database is unaffected
+-To achieve fault tolerance & maximize performance, multiple copies of data are made on various nodes. This leads to a sacrifice in data consistency. If for some reason one nodes data is updated and the other fails to update, there is no automatic rollback of the update as with relational databases.
+-Some NoSQL implementations provide eventual consistency, which means inconsistencies will be ironed out eventually, but not immediately.
+-There are different views that a database can be seen from: end-user viewpoint, global / designers viewpoint, DBMS viewpoint, & physical hardware viewpoint
+-Note that there are typically multiple end-user views, which have some common entities & some different entities
+-these viewpoints can be modeled separately, and often are. For example, professors have a 1:M relationship with classes but students have an M:M relationship.
+-External views - modeling the end-user or external views limits what data different end-users have access to, which promotes security. It also will promote feedback about the models accuracy.
+-the global view of the database incorporates all the views (external and internal). It consists of all the entities, relationships, constraints, & processes. the global view defines a global schema, often called the conceptual schema (because it is abstract & high level).
+-ERM / ERD's are often used for modeling the global view
+-the global view is a logical design, and is kept both software & hardware independent. changes to the software or hardware should not effect the global view
+-the DBSM view is modeled once a specific DBSM is selected, & it details how to implement in concrete form the conceptual schema. It's often called the internal schema. The internal schema is software dependent, but it is still hardware independent.
+-the physical view is concerned with where the data will be stored, how it will be formatted, and how the DBSM / operating system interface with the storage mediums. It is both hardware and software dependent.
+-with the relational model it is not necessary to deal with the physical level. fine-tuning often requires some knowledge of the physical level, as does working with other database models.
+____________________________________________________________
+
+CHAPTER 3
+-the relational model was derived from set theory & predicate logic, similar to prolog - hence SQL is a declarative language. With set theory & predicate logic you can test whether a fact is true or false, and perform operations on sets.
+-the 3 most noteworthy components of an RDBMS: a logical structure (like tables / relations); a system for maintaining data integrity; and a set of operations to manipulate data.
+-the RDBMS, which sits between the user and the database, effectively allows the user to deal with the database on a logical level; in a declarative manner. The physical details are handled internally. This is the main advantage of relational databases.
+-thus we see the data in terms of tables rather than files. We can consider relationships between tables while preserving structural & data independence.
+-a table itself is thought of as a persistent relationship between data. it's this persistent relationship from which the relational model derives its name.
+-a table contains a group of related entities, i.e. an entity set. table & entity set are terms often used interchangeably.
+-remember that a table is a logical, not a physical, representation of data.
+-each column in a table has a range of values. this is called the attribute domain.
+-the columns of a table have data types associated with them
+-the order of the rows & columns is not important, apparently
+-every table has a primary key: an attribute or combination of attributes that uniquely identifies each row.
+-a key can be one or more attributes. keys identify and determine other data attributes
+-functional dependence: the relationship when key field(s) determine data value field(s). notated as: key_field -> data_field. the key is also called the "determinant" and the data value is called the "dependent".
+-composite key: a key that is made up of multiple attributes (called key attributes)
+-superkey: a key that can uniquely identify any row in the table. note: this key:value relationship is 1:1, not 1:M
+-candidate key: a minimal superkey; without superfluous key attributes as part of it. a good candidate for the tables primary key. the key can include multiple attributes, but they must be necessary.
+-entity integrity: when each entity can be uniquely identified by a valid primary key there is entity integrity.
+-primary keys cannot be null or repeat themselves
+-null values are generally disliked in tables and can be an indication of bad table design
+-foreign key: the primary key in one table being used within another table
+-foreign key fields must always be either null or a valid value corresponding with their primary table. this maintains "referential integrity". this enforcement rule limits deleting entries in a table whose primary key is a foreign key in another table
+-secondary key: a key that is used for data retrieval for convenience, i.e. name and phone number, but may not be unique
+-flags: these are sometimes used in place of nulls, i.e. -1 as a missing foreign key and then a dummy row of 0s for data in that keys table at -1
+-UNIQUE and NOT NULL are constraints that can be placed on columns in relational databases
+-There are 8 fundamental relational algebra operators used by relational databases: SELECT, PROJECT, JOIN, INTERSECT, UNION, DIFFERENCE, PRODUCT, DIVIDE. This is more of a theoretical algebraic definition of SQL
+-Apparently few DBMSs support all of these relational operators, but they must at least support SELECT, PROJECT, & JOIN
+-SELECT yields values for all rows that satisfy a condition, i.e. selects specific rows
+-PROJECT yields all values for selected attributes, i.e. selects specific columns
+-UNION combines all rows from 2 tables.
+-INTERSECT yields only rows that appear in both tables
+-DIFFERENCE yields all rows in one table that aren't in another.
+-For UNION, INTERSECT, & DIFFERENCE, tables must have the same or compatible attributes for the operation to be allowed
+-PRODUCT yields all possible pairs of rows from 2 tables.
+-DIVIDE is an obscure operation with a 2 column dividend & 1 column divisor table. Rows listed in the divisor are searched for common elements in the dividend, and the common elements are output.
+-JOIN allows information to be combined from 2 or more tables. There are many kinds of JOINs.
+-natural join: links tables by selecting only the rows with common values in their common attributes.
+-3 steps to a natural join:
+  1) get PRODUCT of the 2 tables
+  2) SELECT the rows with common attributes. the shared columns are called "join columns"
+  3) PROJECT is used to eliminate the duplicate columns that came from joining both tables
+-data dictionary: provides metadata for all tables in the database (column names, relationship types, data types, constraints, etc.)
+-system catalogue: contains all metadata from the data dictionary plus internal metadata that the DBMS needs, like indexing information
+-often only the system catalogue is provided as a table that can be queried, and data dictionary information must be derived from it.
+-query the system catalogue to avoid duplicate column names across tables, and repeat columns
+-1:M relationships are the ideal in relational database design, and you should strive to maximize them. Often this involves primary keys in one table as foreign keys in another (1:M).
+-1:1 relationships should be minimized where possible. Depending on constraints the relationship might be optional where one field is NULL.
+-1:1 relationships can avoid propagation of nulls by making the association in a separate table.
+-M:M is not directly supported in relational databases, but can be implemented indirectly.
+-you don't implement M:M using inverse 1:M relationships from 2 different tables, because it leads to many duplicate primary key entries in each table and inefficiencies in the DBMS.
+-instead you create a bridge table (also called a linking, composite, or associative table).
+-the bridge table includes foreign keys for both other tables primary keys, and its primary key is the combination of both foreign keys. All the data that needs to be mapped between the two tables is just added to the bridge table.
+-often database design must reconcile conflicting priorities of elegance, speed, and information requirements.
+-although relational databases eliminate redundancy (aside from keys being used repeatedly), sometimes deliberate controlled redundancy is necessary for speed or information requirements.
+-controlled redundancy can maintain historically accurate records. For example, databases that keep track of receipts would want a historical record of prices independent of current prices.
+-index: a structure of keys with 1 or more pointers associated with each key, helps find 1 or more table rows quickly.
+-temporary and permanent index structures are both used throughout DBMSs.
+-unique indexes have only one pointer associated with them, and correspond with primary keys or candidate keys
+-tables can have multiple indexes, but each index is associated with only one table.
+-SQL commands create indexes during execution
+-Dr. Cobb lists 12 criteria that a relational database should meet (though not all do meet them). The noteworthy ones are: metadata should be ordinary data stored in a table that can be queried; the DBMS should support a declarative language w/ view definition & programmatic data manipulation; must support set level insert, delete, & update; integrity constraints are defined in the system catalogue, not by applications
+____________________________________________________________
+CHAPTER 4: ENTITY RELATIONSHIP MODELING (ERM)
+-Entity Relationship Diagrams (ERDs) are composed of entities, attributes, relationships, and constraints
+-entities, entity sets, and objects are terms used interchangeably.
+-ERM is conceptual (models the entire database) and can be used for any type of database, not merely relational ones.
+-notations used with ERDs: Chen, Crow's Foot, & UML. Chen is good for conceptual modeling (some concepts can only be shown with Chen), Crow's foot is practical, and UML can do both.
+-in all 3 notations, the entity set (or table) is a rectangle with the table name capitalized.
+-in Chen, attributes are ovals connected to the rectangle with a line.
+-in Crow's foot, the attributes are stacked in rows within the table. attributes in bold are required attributes, nonbold are optional.
+-attributes typically have domains (range of possible values)
+-relational schema: a shorthand notation for table structure: table_name(key_atttribute_1, attribute_2, ... attribute_n)
+-ERD models and relational schema both underline primary keys (and multiple attributes in composite keys)
+-composite attributes: attributes that can be further subdivided, like address into street & zip.
+-for best querying avoid composite attributes
+-multi-valued attribute: an attribute that can hold multiple values - i.e. a person can have multiple degrees
+-Crow's foot does not support multi-valued attributes, but Chen does (2 lines are connected to the oval instead of one)
+-it's much better to use 1:M tables in place of multi-valued attributes in relational databases
+-ERD does not over emphasize drawing relational connections from primary key to foreign key, but just connects the whole tables
+-derived attribute: its value is calculated from other attributes. also called a 'computed attribute'
+-derived attributes are indicated by dashed lines in Chen, & Crow's foot does not support them
+-trade offs with storing derived attributes: storing saves CPU processing & speeds up access, but uses up memory space. not storing provides updated values, while storing requires maintenance to ensure updated values.
+-participants: the 2 tables in a relationship
+-to identify relationships consistently: form a sentence w/ 2 objects & a relating word, then state the sentence in both directions: a division is managed by an employee; an employee can manage only one division - 1:1.
+-
+
+page 113, 4.14 connectivity & cardinality

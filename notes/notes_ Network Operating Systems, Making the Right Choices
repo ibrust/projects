@@ -1,0 +1,46 @@
+published 1994
+
+INTRODUCTION: 
+-In early server style network operating systems (NOS), the PCs had separate OS's from the mainframe server. The shell sat between applications and OS's, and would route requests based on who they were for. 
+-peer-to-peer NOS's emerged. they still needed a server, but it wasn't a dedicated server and could function like a desktop PC as well. 
+-the desktop OS's eventually evolved to where they would all work together via common protocols. nonetheless the client/server model still remains, & is relevant to all network application programming
+-it becomes practical in peer to peer systems to integrate the client OS and server NOS, to some degree. The nodes are now switching functioning as both client & server
+-NOS's also now act as gateways, sitting between LANs and WAN servers. modern NOS's have come to implement various network management systems
+-NOS venders are thus moving in two directions: developing desktop OS's with complete LAN applications; and larger network OS's with better security & management features / integration
+-the distinction between NOS & Desktop OS's is fading. As Desktop OS's provide more network support & multitasking, this increases the load on the NOS (server), pressuring it to maximize performance. The NOS is no longer disconnected from all these other, integrated systems
+
+CHAPTER 1: 
+-a NOS's basic function is to allow computers attached in a network to access resources
+-The two basic designs of NOS's are distributed amongst many computers, and located on servers where the NOS must interface with other regular OS's
+-OS's first develop to interface with / control the hardware. OS's provide a common interface through which applications can interact with the hardware. 
+-early OS's consisted of primitive instructions loaded into ROM, used for controlling devices. There were no facilities for managing RAM or the disk.
+-The ROM-based OS's were improved with software loaded into RAM that could manage files, but the core OS remained in ROM. 
+-The BIOS is the remnant of these original ROM-based systems, often stored on EPROM (flash memory - as of 1994)
+-The BIOS provides the fundamnetal link between the hardware and the OS. It is the machine-dependent part of the OS
+-comprehensive file handling is one of the main features provided by modern OS's
+-When OS's are first loaded, the disks are formatted to facilitate this file organization / access
+-another important feature of OS's is connecting with new devices. If a device driver is not provided in the BIOS, it must be downloaded and added to the system
+-there are drivers for recognizing network equipment as well
+-another important feature of oS's is controlling the execution of a program, handling exceptions & scheduling the work, linking with libraries & so on
+-MS DOS could only handle one process, but OS's capable of handling multiple processes were developed as computing power increased
+-workstations were introduced, terminals that had more computing power than home PC's and ran a version of UNIX. They had LAN support, & multiple processes; this was similar to a NOS
+-the first NOS's were invented as extensions to MS-DOS. 
+-originally, MS-DOS did not support resource sharing. requests for access to resource had to be channeled through the file-server NOS. This NOS allowed MS-DOS to interface normally
+-the NOS server became the vehicle through which all resources were shared, including printers; not just files
+-LANs are not limited to collections of PCs, they can also connect computers to mainframes, or connect terminals
+-In addition to resource sharing and preserving regular interfacing, new requirements on NOS's emerged: security, network management, integration of different types of systems
+-for its two original requirements, NOS's need two components: server file / operations management and client software for interfacing
+-server file management maintains atomicity for shared resource access. different clients also need the server to perform different tasks simultaneously, so multiuser support and multiprocessing was important on the server. 
+-regardless of whether a NOS is on a dedicated server or peer-to-peer network, it must interface with client PCs
+-sometimes NOS's are called server OS's, though it also facilitates the transport of data to the client PCs.
+-To access resources requested by clients, NOS's use a server OS. the server interfaces w/ the OS's of the client PCs, monitoring for resource requests. the sends / receives is where the client network software & protocols come in
+-clients will often have a shell that interfaces with NICs. it will interpret commands & decide whether the PC can handle them or they need to be routed over the network
+-generally speaking, NOS's all need NIC interfacing and a way of interpreting commands as handled by the host or the network
+-
+
+
+
+
+
+
+pg 19, netbios @ top

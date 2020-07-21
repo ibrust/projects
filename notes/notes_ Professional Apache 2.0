@@ -1,0 +1,178 @@
+goal: reach page 275 or so before winter break ends
+
+CHAPTER 1: 
+-Apache is opensource and the most popular server
+-Apache is a daemon process - it runs behind the scenes, providing services for other applications that communicate with it (such as a web browser)
+-Apache is working over a network - so applications that communicate with Apache can be on different machines - i.e. clients.
+-web browsers are the most common client, though there are also web crawlers / web robots (which index your hosted website), among others
+-web servers translate requests into suitable responses. Clients send Apache server a request for a resource; Apache then provides a resource or an explanation for why the resource was unavailable
+-often the resource is an HTMl webpage, but can also be an image, the result of a script that generates HTML, a java app, & other things
+-Apache uses the HTTP protocol to communicate with clients
+-the Apache executable is actually named "httpd", for HTTP daemon
+-to improve Apache 2.0's performance on Windows, platform-specific logic was abstracted into a module. Modules are called MPMs (multiprocessing module). 
+-Apache runs differently on UNIX & Windows. In Apache 1.3 on UNIX, child processes are forked to serve clients; on Windows there is no Fork function, and Apache must use Windows threads. 
+-Apache 1.3 used the POSIX standard to implement threads for Windows, which did not translate perfectly & caused problems. 
+-Now Apache 2.0 directly uses Windows threads, & it runs better on Windows
+-Since threads are more efficient than forked processes, Apache 2.0 also added thread support for UNIX: "worker MPM" & "per child MPM" are modules that support this.
+-In Apache 2.0, the prefork MPM provides continued forking functionality for backwards compatibility.
+-On Windows platforms, Apache runs best on Windows NT because it allows Apache to run as a system service
+-For reliability and security UNIX is still superior and preferred
+-Apache is set up with configuration files, which contain directives that control its behavior. 
+-Apache is highly configurable; this superior versatility is its great strength & drawback. You can configure Apache for any feature & security setting, but it is complicated and must often be done by hand. There are no perfect GUIs for it
+-another strength of Apache is its modularability. A few core features are included in the apache executable, the rest are contained in modules. These can be either built into Apache or loaded dynamically. 
+-Apache 2.o took modularity a step further by removing platform-specific functionality from general MPMs
+-You can choose which modules to include in Apache when building it from source. Including only necessary modules will reduce the memory footprint & simplify configuration, protecting against configuration errors
+-you can also dynamically add modules after building Apache - you just install it then restart the server. There is a slight performance decrease upon startup but generally it's irrelevant
+-there are many 3rd party modules developed for Apache. mod_fastcgi is one such example (speeds up cgi scripts w/ caching)
+-remember HTTP is about how clients make web requests and how servers respond; and it's a stateless protocol
+
+-the first line of an HTTP request consist of: method (operation) | resource | HTTP version. subsequent lines are an optional number of headers that further modify the request, the server will respond appropriately:
+    GET /index.html HTTP/1.1                                        
+    Host: www.website.com                                           the host header can specify a hostname (http 1.1 requires this):
+
+-the server gives an HTTP response in return. Here is a typical Apache server response: 
+    HTTP/1.1 200 OK                                                 code 200 indicates success, 404 indicates failure, & there are others. numerous response headers follow - headers included vary some with the server and the request
+    Date: Mon, 09 Aug 2002 05:37:56 GMT                             date, last modified, & etag are useconnect to a server and send these messages typed out, and see what response you get (chapter 2 talks more about this)
+____________________________________________________________________________________________________
+
+-HTTP methods include: GET, HEAD, POST, OPTIONS, TRACE, DELETE, PUT, CONNECT. Some truncated examples: 
+    -GET request a resource, often a webpage:
+        GET /index.html HTTP/1.0
+        response: 
+        HTTP/1.1 200 OK
+        Date: Mon, 09 Aug 2002 17:02:08 GMT
+        Server: Apache/2.0.33 (UNIX)
+        Content-Length: 1776
+        Content-Type: text/html; charset=ISO-8859-1
+        Connection: close
+        <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//en">
+        <html> ...
+
+    -HEAD returns the header that would be returned by GET, including the content length, but not the body content:
+        HEAD /index.html HTTP/1.0
+
+    -POST sends information to the server; the server must be configured for how to respond, i.e. with a CGI script, etc.. the response may contain confirmation of receiving the request
+        POST /cgi-bin/search.cgi HTTP/1.0
+        Content-Length: 46
+        query=alpha+complex&casesens=false&cmd=submit                   something involving CGI?
+        response:
+        HTTP/1.1 201 CREATED
+        ...
+
+    -OPTIONS: returns a list of the methods supported by the server, especially relevant with WebDAV servers that support additional methods
+        OPTIONS * HTTP/1.1                                              * is placeholder for the URI, used because no resource is needed
+        Host: www.website.com
+        response:
+        HTTP/1.1 200 OK
+        
+    -TRACE: If I remember correctly this helps to trace the network connections and utilizes packets w/ limited lifespans. The author doesn't elaborate
+    -DELETE: delete a resource on the server. Generally, servers other than WebDAV servers do not / should not allow DELETE
+    -PUT: create or change a file on the server, similar to POST but more direct - a subsequent GET request has direct access to the same resource, no filtering. Generally servers other than WebDAV don't allow this
+    -CONNECT: method that allows proxy servers to switch into a tunneling mode for protocols such as SSL
+____________________________________________________________________________________________________
+
+-URI: this is a text string which identifies a resource in a way the server can understand / use, typically a conventional URL (uniform resource locator) that can be understood by a browser, any URI on the server can be specified
+-if the method doesn't need a resource, * is used as a placeholder
+-HTTP/0.9, HTTP/1.0, HTTP/1.1: nothing sends 0.9, but this is used as the default if no protocol is specified & can only handle GET / POST 
+-there are 3 kinds of dedicated HTTP headers: request, response, and entity headers
+-request headers are sent by the client to the server
+-response headers are sent from the server back to the client
+-entity headers can be sent in either direction and add descriptive information about the message. They're only used in HTTP methods that have a body: PUT or POST
+-examples of entity headers: Content-Length, Content-Language, Content-Encoding, Content-Type, Expired, Last-Modified
+-Content-Length is required in client messages and usually in server messages (unless Transfer-Encoding is used instead)
+-Expires tells browsers and proxies how long a document should remain valid for
+-Last-Modified is used by clients or proxy servers to tell if they have updated information: they send a HEAD request to the server & check the Last-Modified header
+-TCP/IP & UDP are network protocols used for internet; some other intranet ones are Token Ring (not compatible with ethernet) & SPX/IPX
+-IPv6 includes IPSec, a new optional authentication / encryption method
+-TCP provides mechanisms for establishing connections; ensuring data is in order; handling data loss, errors, & data recovery. TCP uses a handshake protocol & its own header that contains a sequence number. 
+-IP is the routing / mailing address aspect
+-UDP also uses IP. In contrast to TCP that uses handshaking & ensures data integrity, UDP is connectionless and less reliable - but faster
+-TCP also uses ICMP (internet control message protocol); used to communicate control messages. This is a low-level protocol not found in applications typically
+-TCP is responsible for splitting the message into packetes. There is a max packet size that varies throughout the network, TCP finds out what it is
+-Each packet gets encapsulated with a TCP header. This header contains sequence number, source / destination ports, and a checksum for errors
+-After TCP, IP adds its own header which contains the source & destination IP address, a protocol type code (identifies the packet as TCP, UDP, ICMP), & another checksum
+-IPv6 may also sign the packet for authentication purposes
+-If the packet is to be sent over an ethernet, then an ethernet header is added on top of all this. This also contains a source/destination, protocol type, & checksum. This redundancy is because Ethernet addressing works on a smaller level, using the network interface address, often within a LAN
+-TCP requires that the destination send an ACK (acknowledged) response when it receives the message
+-TCP also requires that the destination send a NAK (not acknowledged) if there was something wrong with the packet
+-TCP also defines SYN (synchronization) and FIN messages. SYN messages establish connections - the destination responds with either an ACK to accept or NAK to reject the request. FIN messages terminate connections - either party can send a FIN at any time. 
+-if TCP gets no ACK or NAK response to a message it sends, it will wait a bit and resend. It appears every packet typically gets an ACK response
+-SYN flood: a type of DOS attack where many synchronization requests are sent to a server
+-Note the TCP model encompasses everything from the data link layer to the application layer
+-A more concrete example of a layer stack is just listing the protocols in order: 
+	server (w/ ethernet): HTTP > TCP > IP > Ethernet
+ 	client (w/ dial-up): HTTP > TCP > IP > PPP (point to point protocol) > serial connection
+-PPP is there to illustrate a protocol for passing data between modems
+-movement between network layers occurs as follows: user asks for a web page in the browser; browser generates a request using HTTP; the request is transmitted over a TCP-initiated connection using IP to route it; it's routed to a gateway across a serial connection using PPP; IP routes it through any intermediate servers; the destination servers network interface identifies the packets sent to it via IP; the server pulls it & other packets like it off the network & the packet is processed using TCP; any enclosed HTTP requests are sent to Apache; Apache processes the requests and sends a response back to the client which again makes its way down the network layer hierarchy. 
+-If we were using a UNIX mail application instead of web pages, we'd use the SMTP protocol in place of HTTP but the other layers: TCP / IP / Ethernet, etc. would remain unchanged. We only change the application layer & TCP/IP handles the rest. 
+-On ethernet there are some alternatives to IP. ARP (address resolution protocol) can translate an IP address into a NIC address; SPX/IPX do not use IP. But IP rules the internet, which is why TCP and UDP are inseparable from IP. 
+-An IPv6 address is 128 bits (in contrast with the 32 bit IPv4). it is notated with hex: fe80::910:a4ff:aefe:9a8 <-- not all the hex digits are here. the :: is a placeholder for a string of 0's that pads the number
+-IPv6 addresses are partially fixed, derived from the NIC address. This allows IPv6 addresses to be allocated more automatically, & helps make devices more mobile (not explained why). 
+-gateway: a point of contact between a local network & the internet which routes packets between them (is it a server or router typically? not explained)
+-In IPv4 there are classes of networks: 
+	-class A network: first number in the address is from 1-126; only first number is fixed, network supports 16,777,214 hosts
+	-class B network: first number from 128-191; both first & second numbers are fixed, network supports 65,534 hosts
+	-class C network: first number from 192-223; first 3 numbers in address are fixed, network supports 254 hosts
+	-first number from 224-254 is reserved in the TCP/IP specification (no further details)
+-IPv6 is divided similarly, but across a wider range; 48 bits are fixed, the remaining 80 assigned to a local network
+-In IPv4 within a local network, all 255s in the non-fixed numbers is a broadcast IP (sends the message to all IPs), and all 0's in the non-fixed fields is the anonymous source IP. netmasks can also be used to divide the IP into separate networks; hosts on these new networks must then use routers & gateways to communicate. 
+-broadcast IPs are always sent with UDP because there is no established two-way TCP connection
+-IPv6 does not support broadcasting, it has something else called multicasting (no further information given)
+-there's also dedicated addresses reserved for local communication, and routers will never try to route messages these outside the local network. these are useful for testing network connections or for building intranets: 
+	-class A: 10.0.0.0
+	-class B: 172.16.0.0 to 172.31.0.0
+	-class C: 192.168.0.0 to 192.168.255.0
+
+-127.0.0.1 is the localhost IP address in IPv4
+-other 127 addresses are used by a variety of services (MAPS, ORDB, ORBZ, Spew) that operate DNS query servers. These services return an address in the 127 range if a given address is blacklisted. These services are used by mail servers to tell if an originating IP is blacklisted, occasionally (127 is not technically a legal range apparently)
+-IP addresses are divided into a network address and local host address (i.e. fixed vs nonfixed parts). Netmasks are often used to get a specific part of the IP address
+-with appropriate netmasks (255.255.255.0 for class C network) a host can easily tell whether a sending address is on your local network or outside it. The host will then know whether it can deliver its message directly, or whether it must send its message to the gateway. the gateway then has its own list of gateways. thus netmasking is part of IP packet routing. 
+-all the hosts on a network are configured to have a gateway to send to. 
+-well-known ports: every standard network service & protocol have well known ports associated with them. TCP defines the concepts of ports to distinguish different services, allowing servers to serve multiple types of requests simultaneously. 
+-when a client sends a connection request, it specifies a port number along with the IP information it sends
+-on UNIX there's a file /etc/services that lists all the well known ports; on windows it's C:\WINNT\system32\drivers\etc\ 
+-HTTP is port 80, HTTPS is port 443. both TCP & UDP use these ports
+-On UNIX, non-privileged programs can't use ports below 1024, these ports are reserved for system services. On Windows there is no such restriction. A non-privileged user, to set up an apache server, would have to configure it to use ports above 1024 (it does not explain how)
+-inetd: instead of keeping multiple daemons running to deal with each different servicable well known port, UNIX uses something called inetd (internet daemon). this monitors incoming requests for ports and launches applications for them on an as needed basis. the authors referred to this as a super-server
+-remember that Apache is only serving the HTTP requests. Others, such as an FTP request, are handled by inetd launching the appropriate daemons (on UNIX systems)
+-Apache 1.3 had a configuration option "ServerType" that allowed it to be launched by inetd rather than run standalone, but this was extremely inefficient since requests for HTTP are so short & apache has to be launched repeatedly. This option was removed in Apache 2.0
+-inetd opens up security problems because it implements services such as telnet which are insecure. many web server administrators disable it completely, as none of the services it provides are necessary for a web server. there's a newer, more secure version called xinetd, but usually people leave it turned off.
+-IPv6 supports better packet prioritization (prioritizing HTTP packets over email packets, for example) and better security with IPSec (its replacment for SSL)
+-some ISPs still do not support IPv6. the server must be configured to support it. Apparently you must configure Apache to support it also
+-6bone: this refers to the foundational infrastructure of the IPv6 network running parallel to the IPv4 network
+-you can get an IPv6 address in 3 ways: get a 6bone address from the ISP that's part of 6bone; get a production IPv6 address from an ISP with a production IPv6 top level network identifier; Use an IPv6 to IPv4 tunnel to connect a local IPv4 address to an external IPv6 address (these addresses will start with 2002, followed by the IPv4 address of the router on the local network). more information: http://www.6bone.net & how to join 6bone
+-here are some UNIX tools for troubleshooting a server: ifconfig, netstat, snoop and tcpdump, ping, spray, traceroute
+-ifconfig: this can display the current configuration of a network interface / change parameters of the network interface:
+	$ /sbin/ifconfig -a 		<-- this command line argument will show the configuration of all network interfaces on the host 
+	> ipconfig /all			<-- this is windows equivalent of that command
+
+-local loopback in the ifconfig/ipconfig printout refers to the local host address. 
+-in ifconfig/ipconfig you might also see multiple entries for the same device: some modern operating systems use IP aliases, which allow several IP addresses to be assigned to the same interface, producing a virtual interface (no further information). 
+-man ifconfig will bring up the manual for ifconfig
+-these aliased IP addresses do not have to be on the same network as the primary IP. with a netmask that evaluates the network section of the IP differently they may be kept on separate networks entirely
+-netstat: another UNIX utility capable of analyzing network interfaces in detail. the following command line arguments can follow netstat: no argument, -a, -c, -i, -n, -r, -s, -v
+	no argument: 	display open connections (sockets)
+	-a: 		also show listening and non-listening sockets
+	-c: 		continuously redisplay an updated version of a specific table
+	-i: 		display network interfaces
+	-n: 		display IP addresses, don't resolve names
+	-r: 		display network routes
+	-s: 		display network statistics
+	-v: 		provide verbose information
+
+-netstat supports many more arguments, this is just a brief list. 
+-snoop and tcpdump are programs that allow you to examine packets being sent on a network. snoop is for solaris systems, tcpdump is for linux, freeBSD & any other that can build it. 
+-packets can be examined as they appear, and filtered according to port, source, destination, protocol, message type, & other parameters
+-for example, you could monitor packets on port 80. you don't even need to be on the server, just the network - though UNIX usually requires privileged access for you to use this tool
+-ping: network tool that sends out an ICMP message to a remote hostname or IP address to establish that it's present and reachable; sends back the time it took
+-many versions of ping allow a remote host to be pinged at regular intervals; apparently this is useful for preventing timing out & disconnecting from a connection
+-
+
+page 32 spray
+
+
+QUESTIONS: 
+-is a gateway typically a server or a router?
+-why does IPv6 being derived from the NIC make the allocation of an IPv6 address more automatic / aid in mobile IP networking? 
+-what is IPv6 multicasting and how is it different from broadcasting in IPv4?
+

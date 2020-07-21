@@ -1,0 +1,417 @@
+t convert them to a common format first
+-SQL queries on a PostGIS database can directly perform calculations on the geometry w/ SELECT, apparently
+-to calculate a distance between two points, the first step is to "geocode" their lat/lon. One tool for this is online: http://nominatim.openstreetmap.org/search?format=json&q=Name_A_Location <--- this returns a lat/long coordinate pair
+-if you have two pairs of coordinates, pyproj can calculate the distance between them: 
+
+    import pyproj
+    lat1, long1, lat2, long2 = (37.8101, -122.4104, 27.80237, -122.40583)
+    geod = pyproj.Geod(ellps="WGS84")
+    angle1, angle2, distance = geod.inv(long1, lat1, long2, lat2) #distance holds the distance between the two points in meters
+
+-pyproj can be used in an application (including web applications) to perform analysis, discussed later
+-mash-up: these are applications that combine data / functionality from different sources. 
+-for example, you could write a script to ongoingly collect housing data in a city and then plot it on a map. 
+-popular software for writing mashups include: google maps API, mapnik, openlayers, MapServer
+-in 2005, google maps & google earth began the opensource online mapping movement
+-GPS also had a big impact on geospatial development. Now that anyone can gather geospatial data via their own GPS device, often the best sources for data are free & opensource
+-geospatial APIs have also become available
+    -google has provided multiple APIs that can include maps / perform limited analysis on the web page
+    -openstreetmap has the geocoder site used earlier, which provides you data - it returns coordinates
+-standard shapefile formats include (currently): GML, KML, GeoRSS, WMS, WFS, WCS
+-GIS systems, google earth, web-based APIs, & toolkits like OGR all work on these standardized information formats
+-it is important to be able to understand / translate between these various standard formats
+-geolocation related programming is becoming more common as GPS devices become widely used (cellphones)
+
+
+CHAPTER 2: 
+-because the earth is not perfectly round, representing the geometry is complex
+-note that latitude and longitude are measures of the angle from the core of the earth
+-the longitudes are: -179 to 180; western longitudes tend to be negative
+-geodetic location: precise lat/long point on the earths surface
+-distances between two points can be in the form of angular (measured from the core of earth), linear, or real travel distance (i.e. a road)
+-linear distance itself is complicated because the earth isn't flat; typically a 'great circle' distance is used, often via the 'haversine formula'
+-decimal degrees notation: 176.234435D; degrees and decimal minutes notation: 176D 14.055'; decimal degrees are preferable for programs
+-Sometimes the quadrant is given instead of a +/- value, i.e. 176.234436D E
+-3 groups of projections according to this book: cylindrical, conical, azimuthal
+-cylindircal projection is the even sized long/lat squares
+-conic projections are an unwarpped cone, you end up with approximately a half circle
+-azumithal projections are circles centered around one point, don't typically show the whole surface of the earth
+-when you work with data, you must know the coordinate system
+-there are two types of coordinate systems: projected and unprojected coordinates. 
+-long/lat are unprojected coordinates, because they refer to a single exact point
+-unprojected coordinates are precise but not suited for distance calculations or other GIS calculations
+-either type coordinate system is also based on a reference point: i.e. equator & prime meridian
+-projected coordinates usually define an origin and map units
+-unprojected coordinate systems often cover the whole earth while projected systems cover a small section
+-often many smaller projected coordinate zones are combined. They are internally referenced using their own internal origins, but these origins are themselves relative to a global origin; this is called 'false easting / false northing'
+-one big advantage unprojected coordinates have is they cover the whole earth without having to deal with different projections
+-datums are mathematical models of the earth: they combine reference points with a model of the earths shape. Datums are used by both map projections and coordinate systems. 
+-three main large-scale datums are: NAD27 (north american datum), NAD83 (north american + central america datum), WGS84 (global datum)
+-WGS84 is used by all GPS satellites and GPS devices
+-a point calculated with different datums may be several hundred feet apart; thus you must know the datum & convert between them as necessary
+-linear ring: a linestring that is closed on itself
+-polygons have an exterior linear ring & optional interior rings
+-GIS data formats can be suited to store or transmit data
+-GIS data formats include: metadata, geospatial data, display information (styling), & attributes
+-meta data includes: projection, coordinate reference system, datum, units of measurement
+-vectors are most common followed by rasters
+-common raster formats: DRG, DEM, BIL, BIP, BSQ; most we won't be using, DEM (digital elevation model) looks like the most interesting
+-common vector formats: ESRI Shapefile, TIGER/Line, Simple Features, Coverage
+-ESRI Shapefile consists of multiple files: .shp, .dbf, .shx
+-Those are the overall formats; individual data elements can also be represented in micro-formats: WKT, GeoJSON, WKB, GML
+-WKT (well known text): simple text format for representing a single feature (point, line, or polygon)
+-GeoJSON: standard for serializing / exchanging the data
+-WKB (well known binary): alternative to WKT that uses binary instead
+-GML (geography markup language): XML based standard for exchanging the data
+_______________________________________________________________________________________________________________________________
+
+-examining a shapefile w/ GDAL/OGR (you're really reading a vector w/ OGR here): 
+    
+    import osgeo.ogr                                            #access individual layers & their features
+    shapefile = osgeo.ogr.Open("filename.shp")
+    numLayers = shapefile.GetLayerCount()                       #get total number of layers in shapefile
+    for layerNum in range(numLayers):
+        layer = shapefile.GetLayer(layerNum)                    #return an individual layer based on layer number
+        spatialRef = layer.GetSpatialRef().ExportToProj4()      #get layers spatial reference system, ?
+        numFeatures = layer.GetFeatureCount()                   #return total features
+        for featureNum in range(numFeatures):
+            feature = layer.GetFeature(featureNum)              #get a specific feature from within the layer
+            featureName = feature.GetField("NAME")              #access a field of the feature
+_______________________________________________________________________________________________________________________________
+
+-geometries are complex nested structures: a polygon contains linearrings, a linearring contains multiple points
+-we can access fields individually, and examine the nested structure of geometries using GDAL:
+                
+    import osgeo.ogr                                            #access all the fields of a feature / access nested goeometries - NEEDS TESTING
+    shapefile = osgeo.ogr.Open("filename.shp")
+    layer = shapefile.GetLayer(0)
+    feature = layer.GetFeature(9)
+    attributes = feature.items()                                #return all the attributes as (key, value) pairs
+    for key, value in attributes.items():                       #redundant use of .items(), test to make sure t      293         294         295         296         297         298         299         300         301         302         303         304         305         306         307         308         309         310         311         312         313         314         315         316         317         318         319         320         321         322         323         324         325         326         327         328         329         330         331         332         333         334         33his works
+        print(" {} = {}.format(key, value))
+    geometry = feature.GetGeometryRef()                         #access the baseline geometry
+    geometryName = geometry.GetGeometryName()                   #return the geometry type of the feature
+
+    if (geometry.GetGeomtryCount() > 0):                        #returns the number of nested geometries within the geometry; returns 0 when used on points
+        nested_geometry = geometry.GetGeomtryRef(0)           #access the first nested geometry within the base geometry 
+    if (geometry.GetPointCount() > 0):                          #returns number of points once you reach the bottom level
+        total_points = geometry.GetPointCount()
+_______________________________________________________________________________________________________________________________
+
+-multipolygons contain polygons, polygons contain linearrings, linearrings contain points; normal lines contain points
+-you can analyze the points within geometries: 
+    
+    import osgeo.ogr                                                #code to find the northmost & southmost points in a point geometry (not a nested geometry)
+    shapefile = osgeo.ogr.Open("filename.shp")
+    layer = shapefile.GetLayer(0)
+    feature = layer.GetFeature(9)
+    geometry = feature.GetGeometryRef()
+    identified_points = {'north':None, 'south':None}
+    for i in range(geometry.GetPointCount()):                       #loop through each point in the geometry
+        x,y,z = geometry.GetPoint(i)
+        if (results['north'] == None or results['north'][1] < y:
+            results['north'] = (x,y)
+        if results['south'] == None or results['south'][1] > y:
+            results['south'] = (x,y)
+_______________________________________________________________________________________________________________________________
+
+-The above code will work if the geometry contains points at its first level. The author often uses recursion w/ geometry.GetGeometryCount() to explore a variety of complex nested geometries
+-To calculate distances between two points (let's say the northmost and southmost point in a geometry), you must use the haversine formula. The author says there are libraries for this, though he does it manually with an example
+-in the same manner above, you can calculate the middlemost point in a geometry, the most eastern / western points, points within a certain distance, and so on. 
+
+
+CHAPTER 3: 
+-originally GDAL was for rasters & OGR was for vectors, but now the two libraries have merged and they're installed together, often collectively referred to as just GDAL
+-GDAL/OGR is for reading / writing geospatial data, essentially
+-rasters consist of "bands"; these are like layers for a raster
+-there may be separate bands for different color spectrums, i.e. red green blue. There can also be different bands for things such as vegetation, elevation, and so on
+-each band is a grid of cells which are mapped to a point on the earth
+-each cell in a band consists of an int or float
+-cells can also have 'no value' if you want to store nothing there in a band
+-you typically access cells in mass, not individually; because there are too many cells
+-to access cells in mass w/ GDAL, you have two methods: band.ReadRaster() or band.ReadArray()
+-band.ReadRaster() reads some or all of the cells in as a large string of binary; you then convert the binary to an array of values using structs provided by GDAL 
+-band.ReadArray() will store some or all of the cells in a NumPy array object
+-the ReadRaster / struct approach is more efficient and allows you to direct access the int/float value, but you can only access one row at a time
+-the ReadArray() / NumPy method is easier to read multiple rows, but the data is stored as a custom NumPy object; reading the data requires internal conversion that slows down performance (though he alludes to doing this conversion yourself)
+-band objects have WriterRaster() and Writearray() methods that work with either approach (and you can write and read, apparently)
+_______________________________________________________________________________________________________________________________
+
+-you can create a GeoTIFF raster in GDAL
+-first you select & create a driver for the file type, then you set the projection used to position the cells on the earths; then you define a georeferencing transform that tells GDAL how to map the cells to the earth (seems redundant).
+-after that you can access the bands in the raster individually: 
+
+    from osgeo import gdal                                                          # create driver
+    driver = gdal.GetDriverByName("GTIFF")
+    dstFile = driver.Create("newraster.tiff", 360, 180, 1, gdal.GDT_INT16)          # arguments: (filename, cells_per_row, cells_per_column, numbers_of_bands, cell_data_type)
+    from gdal import osr                                                            # set projection
+    spatialReference = osr.SpatialReference()
+    spatialReference.SetWellKnownGeogCS("WGS84")                                    # create / initialize a spatial reference object
+    dstFile.SetProjection(spatialReference.ExportToWKT())
+    affine_transform_matrix = [-180, 1.0, 0, 90, 0, -1.0]                           # [X_origin_point, cellWidth, ?, Y_origin_point, ?, -cellHeight] <-- affine transform matrices are not discussed much beyond this, but part of transform
+    dstFile.SetGeoTransform(affine_transform_matrix)                                # execute the georeferencing transform
+
+    band = dstFile.GetRasterBand(1)                                                 # return reference to the only band in the raster
+_______________________________________________________________________________________________________________________________
+
+-next you fill a 2d list with data for each cell, and you can write it to a specific band using either method:
+
+    # cell_2d_list <- a 2d list you filled with the cell data
+    import struct                                                                   # struct method
+    fmt = "<" + ("h" + band.XSize)                                                  # no idea what this line does, he doesn't explain, works with the struct library pack function
+    for row in rnage(len(cell_2d_list)):
+        scanline = struct.pack(fmt, *cell_2d_list[row])                             # not sure what any of this does or what the * does in python, either
+        band.WriteRaster(0, row, 360, 1, scanline)                                  # (?, data_to_write, number_of_items, ?, packed_struct) <-- not sure what this is doing really
+
+    import numpy                                                                    # numpy method
+    array = numpy.array(cell_2d_list, dtype=numpy.int16)                            # create the numpy array object; you specify the cell value data type, it creates its own internal representation of that number; must convert between
+    band.WriteArray(array)
+_______________________________________________________________________________________________________________________________
+
+-we can also read data in the cells of the raster w/ either method, w/ either the struct module or numpy (NumPy must be installed to read, he says? I thought it already was installed for writing): 
+
+    #continued from the above code
+    import struct                                                                               #the struct method
+    fmt = "<" + ("h" * band.XSize)
+    for row in range(band.Ysize):
+        scanline = band.ReadRaster(0, row, band.XSize, 1, band.XSize, 1, band.DataType)         #he says the GDAL documentation contains more information, but this can scale data as it's being read - perhaps this alters pixel densities? 
+        row_of_data = struct.unpack(fmt, scanline)
+
+    cell_2d_list = band.ReadAsArray()                                                           #NumPy read
+    for row in range band.XSize():
+        #access each row in the 2d list                                                           
+_______________________________________________________________________________________________________________________________
+
+-OGR deals with reading and writing vector data. OGR handles data-sources which could consist of one or more related vector layers. Layers consist of features; features have a geometry w/ a list of attributes. Also the layer has a spatial reference which identifies the projection & datum. This is OGRs format for dealing with a wide variety of vector formats. 
+-Shapefiles do not support multiple layers, for example, so OGR treats shapefiles as a datasource consisting of only one layer
+-chapter 2 covered how to read from a vector w/ OGR; you can write to a vector in OGR also.
+-there's also os module code to create a directory to store the multiple ESRI shapefiles. 
+-after creating the directory, establish a new shapefile as an OGR datasource; this involves selecting a driver and asking the driver to create the data source. Then you set the spatial reference. Then you create an actual layer (different from the datasource). Then you create fields for desired attributes in the layer. Finally you can directly store geometries w/ the established attributes in the layers: 
+    
+    import os, os.path, shutil, random
+    from osgeo import ogr, osr
+    if os.path.exists("new shapefile"):
+        shutil.rmtree("new shapefile")                          #does this remove the directory if it exists? be careful with that; though this was included to allow you to run the program repeatedly without deleting the file first
+    os.mkdir("new shapefile)                                    #create a new directory
+    
+    driver = ogr.GetDriverByName("ESRI Shapefile")              #OGR driver establishes the type of file to be used as an OGR datasource
+    path = os.path.join("new shapefile", "shapefile.shp")   
+    datasource = driver.CreateDataSource(path)                  #create the OGR datasource in the path specified
+    
+    spatialReference = osr.SpatialReference()
+    spatialReference.SetWellKnownGeogCS('WGS84')                #establish spatial reference
+    layer = datasource.CreateLayer("layer", spatialReference)   #create a layer within the datasource (ESRI shapefiles only have one)
+
+    field = ogr.FieldDefn("ID", ogr.OFTInteger)                 #create the attribute fields in the layer
+    field.SetWidth(4)
+    layer.CreateField(field)
+    field = ogr.FieldDefn("NAME", ogr.OFTString)
+    field.SetWidth(20)
+    layer.CreateField(field)
+
+    for i in range(999):
+        id = 1000 + i                                           #field width was 4, it appears this corresponds to 4 numbers...?
+        lat = random.uniform(-90, +90)                          #what is random.uniform?
+        long = random.uniform(-180, +180)
+        name = "point-{}".format(i)
+
+        wkdt = "POINT({} {})".format(long, lat)                 #create WKT string for specifying the geometry field
+        geometry = ogr.CreateGeometryFromWkt(wkt)               #use the WKT string to create a geometry object
+
+        feature = ogr.Feature(layer.GetLayerDefn())             #now create ogr.Feature objects for each point and store the geometry / attributes in it.
+        feature.SetGeometry(geometry)
+        feature.SetField("ID", id)
+        feature.SetField("NAME", name)
+        layer.CreateFeature(feature)                            #tell the layer to create this feature
+_______________________________________________________________________________________________________________________________
+
+-here we open and read the above vector file w/ OGR, as covered briefly in Chapter 2: 
+
+    from osgeo improt ogr
+    shapefile = ogr.Open("new shapefile/shapefile.shp")
+    layer = shapefile.GetLayer(0)
+
+    for i in range(layer.GetFeatureCount()):
+        feature = layer.GetFeature(i)
+        id = feature.GetField("ID")
+        name = feature.GetField("NAME")
+        geometry = feature.GetGeometryRef()
+_______________________________________________________________________________________________________________________________
+
+-GDAL/OGR were written in C/C++, the documentation is all in that language. To find the python documentation, use the docstrings. Go to the command line and type: pydoc -g osgeo. Alternatively, use Pythons help() command, though not all methods are documented and you might have to read the C/C++ documentation: 
+    from osgeo import ogr
+    help(ogr.DataSource.CopyLayer)
+
+-it is common that you need to convert data from one projection or datum (model of the earths shape) to another. pyproj is useful for this
+-pyproj is a python wrapper around the PROJ4 library. with this you can access PROJ4 from within python
+-pyproj consists of two classes, Proj and Geod. 
+-Proj converts between geographic coordinates (long/lat) and cartographic coordinates (x,y; by default in meters).
+-Geod performs great-circle distance and angle calculations
+-to use the Proj class, create an instance with the projection, datum, & other information specified: 
+
+    projection_instance = pyproj.Proj(proj='tmerc', ellps='WGS84')           #transverse Mercator projection, WGS84 ellipsoid (is that a datum?)
+
+-after creating this instance, it can be used to convert between geographic coordinates & cartographic coordinates in both directions. 
+-transform() is apparently a useful function that converts from one projection to another - you pass it a Proj object of the initial projection & desired ending projection
+-you also can create Geod objects. Geod has a few methods: fwd, inv, npts
+    -fwd() takes a point, azimuth (angular direction), & distance. returns a 2nd point & a second azimuth, using this information
+    -inv() takes two points. returns distance and 2 azimuths
+    -nptrs() calculates coordintes for equidistant points along a line defined by a start & end point
+-to create a geod object you must specify the ellipsoid
+-the following code demos both Proj & Geod; it converts 2 coordinates from UTM-17 format to WSG lat/long format, then creates a Geod object to calculate the lat/long of a point 10 KM away in its original format:
+    
+    import pyproj
+    UTM_X = 565718.523517
+    UTM_Y = 3980998.9244
+
+    srcproj = pyproj.Proj(proj="uml", zone="17", ellps="clrk66", units="m")
+    destproj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
+    long, lat = pyproj.transform(srcProj, destProj, UTM_X, UTM_Y)                   #convert the UTM_X and UTM_Y points to WSG84 standard projection long/lat points
+    
+    angle = 315                                                                     #this angle corresponds to north east; we will get a point 10 km north east in the original UTM projection, using our current WSG84 long/lat points 
+    distance = 10000                                                                #distance is in meters
+    geod = pyproj.Geod(ellps='clrk66')
+    long2, lat2, second_azimuth = geod.fwd(long, lat, angle, distance)
+_______________________________________________________________________________________________________________________________
+-another way to initialize Proj: with GDAL/OGR you can extract the projection as a "proj4 string" and use this to initialize a Proj object
+-Shapely is a python library that is used to perform calculations using geometry data. It is based on GEOS which implemented many geometry manipulation functions in C++. GEOS in turn was based on the Java Topology Suite, the same for Java
+-Shapely provides a python interface to GEOS. if you use the following imports it will use the C implementation of GEOS to do the work, and will go much faster:
+    import shapely
+    import shapely.speedups
+-common shapely modules (import them individually): shapely.geometry, shapely.wkt, shapely.wkb, shapely.ops
+-shapely.geometry defines the core geometry classes used by shapely
+-shapely.wkt provides functions to convert between shapely geometry objects and WKT strings. shapely.wkb does the same for binary
+-shapely.ops provides functions for performing operations on multiple geometry objects simultaneously
+-you often use the geometry module. 
+-8 types of geometries are supported: Point, LineString, LineRing, Polygon, MultiPoint, MultiLineString (multiple lines), MultiPolygon, GeometryCollection (different types of geometries)
+-all 8 of these are classes within the geometry module, i.e. shapely.geometry.MultiPoint
+-Points can be 2 dimensional (x,y) or 3 dimensional (x,y,z)
+-LineStrings are strings of points. They can be simple or complex. Simple linestrings never cross, complex linestrings cross one another
+-LinearRing's line cannot cross or touch itself
+-Polygon can have holes in it
+-GeometryCollection can be any combination of the other geometries
+-these classes provide a number of methods for manipulating the data. For example, LineString provides the length attribute, and a crosses() method that returns true if two of the lines cross
+-other methods allow you to calculate the intersection of 2 polygons, dilate or erode geometries, simplify a geometry, calculate distance between two geometries, build a polygon that encloses all points within a list of geometries, etc.
+-shapely is a spatial manipulation library, not a geospatial manipulation library. It assumes the data has been projected onto a cartesian plane before it handles it. the results can then be converted back to geographic coordinates. 
+_______________________________________________________________________________________________________________________________
+
+-the following code creates a circle & a square, and calculates their intersection: 
+
+    import shapely.geometry
+    import shapely.wkt
+
+    pt = shapely.geometry.Poinkt(0, 0)
+    circle = pt.buffer(1, 0)
+    square = shapely.geometry.Polygon([(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]
+    
+    intersect = circle.intersection(square)
+    for x, y in intersect.exterior.coords:                                          #not sure what exterior.coords is, some method of intersect
+        print(x, y)
+    print(shapely.wkt.dumps(intersect))                                             #not sure wht wkt.dumps is either, author doesn't specify, have to read shapely documentation
+_______________________________________________________________________________________________________________________________
+
+-documentation for shapely: http://toblerity.org/shapely/manual.html
+-Mapnik takes geospatial data and converts it into a good looking image
+-in Mapnik, rules control which features appear on the map and symbolizes dictate how they look
+-with Mapnik you can create XML stylesheets (similar to CSS stylesheets) to control the styles, or you can do it manually
+-Mapnik is implemented in C++. bindings for python used to be provided but are now standalone, read about python-mapnik for details
+-the output of Mapnik is merely an image; this makes it easy to include in web-based applications; though it is still useful in desktop applications
+-in Mapnik, the main object you work with is a Map object
+-when you create the Map object, you define its general attributes: width, height, spatial reference, background color
+-you then define one or more layers. each layer has a name, datasource object for where to access it, spatial reference, and a list of styles to apply to it
+-lastly you define one or more styles, which you apply to the layers. Styles have a name, minimum scale / maximum scale values (determines the geometry range to apply the style rule to), a filter expression (the rule only applies to features that match the filter), and a list of symbolizes (define the style, i.e. how to draw the features on the map)
+-there are different kinds of symbolizers: 
+    -LineSymbolizer: this draws the actual stroke line
+    -LinePatternSymbolizer: uses the content of an image to draw the stroke along a line
+    -PolygonSymbolizer: fills the polygon
+    -PolygonPatternSYmbolizer: fills the polygon with an image pattern (image is specified by a name)
+    -PointSymbolizer: uses the contents of an image file to draw a point symbol
+    -TextSymbolizer: draws text w/ the text from a features attributes
+    -RasterSymbolizer: used to draw rasters, no more detail given
+    -ShieldSymbolizer: bundels a point with a textbox; like combining a PointSymbolizer with a TextSymbolizer
+    -BuildingSymbolizer: a pseudo-3D building effect
+    -MarkersSymbolizer: draws blue directional arrows following a polygon or line geometry; intended for one-way streets, still experimental
+
+-when you instantiate a symbolizer to add it to a style, you provide parameters dependent on the type. A very brief example: 
+    p = mapnik.PolygonSymbolizer(mapnik.Color(127, 127, 0))
+    p.fill_opacity = .8
+    p.gamma = .65
+_______________________________________________________________________________________________________________________________
+-here is some outdated example code which did not run successfully, you will need to read the mapnik docs and figure out which parts aren't updated: 
+
+    import mapnik
+
+    symbolizer = mapnik.PolygonSymbolizer(mapnik.Color("darkgreen"))            #this did not work, and seems outdated. When I removed mapnik.Color from inside, to match the errors argument list, it worked. new way of setting color?
+    rule = mapnik.Rule()
+    rule.symbols.append(symbolizer)
+    
+    style = mapnik.sStyle()
+    style.rules.append(rule)
+
+    layer = mapnik.Layer("mapLayer")
+    layer.datasource = mapnik.Shapefile(file="shapefile.shp")
+    layer.styles.append("mapStyle")
+
+    map = mapnik.Map(800, 400)
+    map.background = mapnik.Color("steelblue")
+    map.append_style("mapStyle", style)
+    map.layers.append(layer)
+
+    map.zoom_all()
+    mapnik.render_to_file(map, "map.png", "png")
+_______________________________________________________________________________________________________________________________
+-the following documentation exists for mapnik (he says work your way through the two tutorials and tentatively read the python documentation, but alot of this is poorly written): 
+    -mapnike wiki: https://github.com/mapnik/mapnik/wiki
+    -python specific documentation: http://mapnik.org/docs
+    -learning mapnik page on the wiki: https://github.com/mapnik/mapnik/wiki/LearningMapnik
+
+
+CHAPTER 4:
+-
+
+
+
+
+
+CHAPTER 5: 
+-it's fairly easy to get the 4 bounding box points of a geometry with ogr, and any fields you need. After obtaining a layer:
+    feature = layer.getFeature(0)
+    name = feature.GetField("NAME")                                 #assuming the layer has a NAME field
+    geometry = feature.GetGeometryRef()                             #again this returns a reference to the features geometry
+    minLong, maxLong, minLat, maxLat = geometry.GetEnvelope()
+
+-
+    
+
+_______________________________________________________________________________________________________________________________
+
+INSTALLATION: 
+-install GDAL: go to ubuntu package search & search for GDAL: https://packages.ubuntu.com/uk/ install the ones you need, including the python bindings & development package
+-test GDAL installation: run python: import osgeo
+-you can install pyproj using pip. check the install with: 
+
+    import pyproj    
+    print(pyproj.__version__)
+
+-to install shapely, this worked, though I'm not sure if you need wheel but why not install it: 
+    pip3 install wheel
+    sudo apt-get install python3-shapely
+
+    import shapely
+    import shapely.speedups
+    print(shapely.__version__)
+    print(shapely.speedups.available)
+
+-not sure how to install mapnik, or its python3 bindings (python3-mapnik?). might be a compatibility issue w/ current version of GDAL (but I don't know). figure out git, failed to build mapnik from source
+-test the install with: 
+    import mapnik
+    print (mapnik.mapnik_version())
+
+QUESTIONS: 
+-GML: what is the purpose of this; why would you want an XML standard for data exchange? 
+-in the GDAL example code, should .items() be used redundantly or is that a mistake in the code
+-what is random.uniform? 
+-how does git work, how do you install something from source? 
+-why is the mapnik code not working in python2 either, how does mapnik work, can I get it working, etc.
+
+

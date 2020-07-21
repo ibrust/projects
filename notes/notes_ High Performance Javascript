@@ -1,0 +1,86 @@
+Chapter 1:
+-place script tags at the bottom of the body, they block the downloading / execution of other resources.
+-try to minimize total number of externally linked script tags; though this is less important now that most browsers implemented parallel downloading.
+-don't place inline script tags after a link to a stylesheet; it will need to wait on the stylesheet to download before executing to know if any information in the element was modified.
+-to minimize the number of script tags, you can combine the scripts into a single file (assuming they're locally hosted) using a combo handler or build tool.
+-javascript will also block HTTP requests and UI updates
+-the real secret to fast scripts is apparently to use the windows load event to execute them after everything else has finished loading
+  <script>
+    window.onload = function(){alert("loaded");};
+  </script>
+
+-scripts also have a boolean defer attribute that, when specified, causes the script to execute after the DOM loads. Not all browsers support this, apparently
+-scripts marked with defer will download as soon as they're parsed, not block anything, and execute at the end.
+-apparently HTML5 caused defer to have to be used with externally linked scripts, and not inline scripts
+-using the DOM functions you can create script elements and add them to the page, then link to external scripts. They will download and then execute.
+-if you dynamically create script elements using the DOM, be sure to place them in the head. placing them in the body can mess up the load event
+-if the dynamic script is to be used by other scripts (if it contains functions), you might not want the script to execute automatically. in certain browsers, the script will trigger a load event when it finishes downloading.
+  var script = document.createElement("script");
+  script.type = "text/javascript";
+  script.onload = function(){               // works in Firefox, Opera, Chrone, Safari 3+ as of this writing (2010?)
+    ...
+  };
+  script.src = "file1.js";
+  document.getElementsByTagName("head")[0].appendChild(script);
+
+-internet explorer, as of 2010, has an alterantive method of creating dynamic script elements. instead the script element has a readystatechange event and readystate properties that change state as the file downloads.
+-the only two properties to be concerned with are loaded and complete. there is a bug where we don't know which of these will be the final state / whether both will fire, so they both must be checked:
+  var script = document.createElement("script");
+  script.type = "text/javascript";
+  script.onreadystatechange = function(){
+    if (script.readyState == "loaded" || script.readyState == "complete"){
+      script.onreadystatechange = null;
+      ...                                     // same as above, the code to execute when the script is loaded
+    }
+  };
+  script.src = "file1.js";
+  document.getElementsByTagName("head")[0].appendChild(script);
+
+-you can combine the two above approaches into one function for creating dynamic scripts in the following manner:
+  function loadScript(url, callback){
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    if (script.readyState){                           // internet explorer code
+      script.onreadystatechange = function(){
+        if (script.readyState == "loaded" || script.readyState == "complete"){
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    }else{                                            // other browsers code
+      script.onload = function(){
+        callback();
+      };
+    }
+    script.src = url;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  }
+
+-you can download / execute multiple scripts at once with this method, but execution order is only guaranteed by firefox and opera. this can be circumvented with the following calling method:
+  loadScript("file1.js", function(){
+    ...
+    loadScript("file2.js", function(){
+      ...
+      loadScript("file3.js", function(){
+        ...                                   // all files are finished loading when you reach here
+      });
+    });
+  });
+
+-if you want to execute the scripts in order, it's better just to concatenate all the scripts into one giant file and download that.
+-dynamic script loading is, apparently, the most preferred method of asynchronous loading of scripts because it allows for cross-browser compatibility.
+-
+
+
+
+
+page 10 very top
+
+ideal learning order:
+async 6
+types 3
+this 4
+closures 2
+e6 5 - this is quite useful for the map project also ...
+performance 7 - performance is useful for the upcoming project
+rino 1

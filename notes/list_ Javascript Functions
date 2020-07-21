@@ -1,0 +1,57 @@
+JAVASCRIPT FUNCTIONS:
+
+alert(string)
+int parseInt(string mixed_string, int depth);	// mixed_string is a string w/ an int at the start; depthis how far into the string you want to look for ints; returns an int
+
+
+
+
+_________________________________________________________________________________________________________________________
+STRING METHODS: 
+
+indexOf(char)
+lastIndexOf(char)
+charAt(int)
+toUpperCase()
+toLowerCase()
+
+
+
+_________________________________________________________________________________________________________________________
+FLOAT METHODS: 
+
+toFixed(int)
+toPrecision(int)		// toFixed and toPrecision do mostly the same thing, but Precision looks for significant digits & rounds; Fixed just specifies total decimal places & rounds
+
+
+
+_________________________________________________________________________________________________________________________
+INT METHODS:
+
+toString(int base)		// this will convert the calling integer to a string of numbers in the specified base
+
+
+
+_________________________________________________________________________________________________________________________
+ARRAY METHODS:
+
+pop()
+push(element)
+shift()					// pops the front of the array instead of the back
+unshift(element)			// pushes the front of the array instead of the back
+concat(second_array)			// combines the array argument w/ the calling array
+join(specifiers) 			// returns a string of all the array elements separated by the specifier (comma w/ no space by default)
+slice(lowindex, highindex)		// returns a slice not including the high index
+splice(2, 1, "joe", "fred", "bob");	// splice is used for simultaneous inserts / removals from arrays
+					// starting at index 2, 1 element is removed. Then the following 3 arguments are then inserted at index 2
+reverse()
+sort()
+
+optional_callback = function(a, b){return a - b;};	// if you want to sort an array of numbers you must provide the callback function: 
+sort(optional_callback)			
+
+indexOf(element)
+forEach(callback(element, index, array){statements;});	// ? syntax correct? 
+
+
+

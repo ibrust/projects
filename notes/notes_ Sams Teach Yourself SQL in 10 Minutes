@@ -1,0 +1,232 @@
+SELECT column_1, column_2               /* limiting # of results in SQL */
+FROM table_name                         /* MySQL, Maria, Postgres, SQLite */
+LIMIT 5 OFFSET 10;                      /* LIMIT 5, 10 - alternative syntax */
+
+SELECT TOP 20 column_1                  /* MS SQL */
+FROM table_name;
+
+SELECT column_1
+FROM table_name
+FETCH FIRST 5 ROWS ONLY;                /* DB2 */
+
+SELECT column_1
+FROM table_name
+WHERE ROWNUM <= 5;                      /* ORACLE */
+____________________________________________________________________
+SELECT *                                /* wildcard column selection - returns any columns, even unknown ones
+FROM table_name;
+____________________________________________________________________
+-- and /* */ are for comments. # can sometimes be used also.
+____________________________________________________________________
+SELECT column_1, column_2               /* return query in sorted order */
+FROM table_1
+ORDER BY column_1;                      /* ORDER BY must always be at the end of the statement, after any WHERE */
+
+SELECT column_1, column_2
+FROM table_1
+ORDER BY column_1 DESC, column_2;       /* return results in descending order, and use 2 columns for sorting - the 2nd is for any matches */
+
+/* note that MS ACCESS does not allow using aliases within ORDER BY */
+____________________________________________________________________
+SELECT column_1, column_2                                         /* filtering results */
+FROM table_1
+WHERE column_1 <> 20;                                             /* not equal is symbolized by either <> or != depending on the DBMS */
+
+SELECT column_1, column_2
+FROM table_1
+WHERE column_1 IS NULL AND column_2 = 30;                         /* IS NULL is another comparison operation */
+
+SELECT column_1, column_2, column_3
+FROM table_1
+WHERE column_1 = "dog" AND (column_2 > 10 OR column_3 < 5);       /* parenthesis in boolean WHERE expressions */
+
+SELECT column_1, column_2, column_3
+FROM table_1
+WHERE column_1 IN ("dog", "cat");                     /* the IN clause is shorthand for a series of ORs - i.e. column_1 = "dog" OR column_1 = "cat" */
+
+SELECT column_1, column_2
+FROM table_1                                          /* notice here that the date_column was referenced in the WHERE but not part of the SELECT. That is allowed */
+WHERE NOT column_3 = "dog";                           /* Usually NOT can be put before comparisons. MariaDB only allows NOT to be used before IN, BETWEEN, and EXISTS */
+____________________________________________________________________
+SELECT column_1, column_2                             /* wildcard filtering */
+FROM table_1
+WHERE column_1 LIKE "%fish";                          /* return all results that end with fish. Remember that some DBMs extend the field with spaces, and %fish won't match.
+                                                         %fish% is required in those DBMs. depending on the DBMs configuration the search may also be case sensitive.
+                                                         MS Access uses * instead of % for this operation. */
+SELECT column_1, column_2
+FROM table_1
+WHERE column_1 LIKE "f%d";                            /* the % can be in any position, and it means 0 or more occurrences */
+
+SELECT column_1, column_2
+FROM table_1
+WHERE column_1 LIKE "__ inches";                      /* _ is a single wildcard character. This __ looks for a 2 digit string (a number perhaps).
+                                                         MS Access uses ? instead of _ for this operation */
+SELECT column_1, column_2
+FROM table_1
+WHERE column_1 LIKE "[AEIOU]%";                      /* only MS SQL and MS Access support [] set operations.
+                                                        this will find any word whose first letter is a vowel */
+SELECT column_1, column_2
+FROM table_1
+WHERE column_1 LIKE "[^AEIOU]%";                      /* this will work in MS SQL, and will return any word that starts with a consonant
+                                                         in MS Access it must be ! instead of ^. Why...? No one can tell you */
+
+/* Try to minimize wildcard use if performance is a factor, they require more resources */
+____________________________________________________________________
+SELECT column_1 + ' (' + column_2 + ')'               /* concatenating fields */
+FROM table_1;                                         /* the + operator works in MS Access and MS SQL. */
+
+SELECT column_1 || ' (' || column_2 || ')'            /* the || operator is used in Db2, Oracle, Postgre, SQLite, and Open Office Base */
+FROM table_1;
+
+SELECT Concat(column_1, ' (', column_2, ')')          /* the Concat function is used in MySQL and MariaDB */
+FROM table_1;
+
+SELECT RTRIM(column_1) + ' (' + RTRIM(column_2) + ')'       /* some databases save text values with padding on the right hand side, and you have to remove it with RTRIM
+FROM table_1;                                                  before concatenating */
+
+SELECT column_1 + ' (' + column_2 + ')' AS new_column_title         /* concatenation leaves the new column without a title, which is problematic.
+FROM table_1;                                                          AS should be used to give it a new title. */
+
+/* AS is also often used to rename illegally titled columns (like those with spaces or dots) or to improve readability */
+____________________________________________________________________
+SELECT column_1, column_2, column_1 * column_2 AS new_title         /* arithmetic select
+FROM table_1;
+____________________________________________________________________
+/* functions are very DBSM specific. There's a tradeoff between portability and efficiency - using functions is usually more efficient than doing the operation manually,
+   but usually this means portability is limited.
+   Typically SQL implementations support text related functions (like trimming, converting case, or padding), mathematical functions, date & time functions,
+   and DBSM specific system functions, among others. */
+
+SELECT UPPER(column_1) AS column_1_uppercase
+FROM table_1
+ORDER BY column_1;
+
+/* one strange function which some DBMSs support is the SOUNDEX() function, which returns phonetically similar strings - useful for search for input errors */
+
+SELECT column_1                           /* MS SQLs method of date manipulation. DBMSs tend to have their own non-portable date manipulation functions. */
+FROM table_1
+WHERE DATEPART(yy, date_column) = 2012;
+
+SELECT column_1                                                             /* oracles method of date manipulation, which is very sloppy */
+FROM table_1
+WHERE to_number(to_char(date_column, 'YYYY')) = 2012
+
+SELECT column_1                                                             /* oracles roundabout way of doing the same thing, which turns out to be easier */
+FROM table_1
+WHERE date_column BETWEEN to_date("01-01-2012") AND to_date("12-31-2012");
+
+SELECT column_1                                         /* MySQL and MariaDB have many different functions to work with dates, this one
+FROM table_1                                                                   extracts the year from it */
+WHERE YEAR(date_column) == 2012
+
+SELECT column_1
+FROM table_1
+WHERE NOT column_1 < 10;                               /* NOT precedes the entire statement */
+
+
+/* there's usually more advanced date manipulation functions (an important part of database manipulation) but they're all very DBMS specific, refer to documentation */
+____________________________________________________________________
+/* the arithmetic functions tend to be more uniform across DBMS, though less used. common ones are: ABS(), COS(), EXP(), PI(), SIN(), SORT(), TAN() */
+____________________________________________________________________
+/* aggregate functions are used to get statistics from multiple rows: SUM(), MIN(), MAX(), COUNT(), AVG()
+   These functions tend to be supported by all DBMSs */
+
+SELECT AVG(column_1) AS average_column_1
+FROM table_1;                                  /* NULL fields in column_1 will be ignored */
+
+SELECT COUNT(column_1) AS average_column_1
+FROM table_1
+WHERE column_2 = "sheep";                      /* combine WHERE with aggregate functions to only aggregate specific fields */
+
+SELECT COUNT(*) AS average_column_1
+FROM table_1;                                  /* COUNT(*) will count all rows in the table, ignoring NULL. COUNT(column_x) will
+                                                   not count NULL rows in that column */
+SELECT MAX(column_1*column_2) AS max_product
+FROM table_1;                                  /* all aggregates can be used with mathematical operators, not much point combining w/ count though  */
+
+SELECT AVG(DISTINCT column_1) AS average_of_distincts
+FROM table_1;                                  /* DISTINCT can precede a column name, and wont include duplicate entries in the calculation */
+
+/* TOP and TOP PERCENT are some other aggregate functions, but only some DBMSs support these */
+____________________________________________________________________
+/* GROUP BY and HAVING are used in combination with aggregate functions to perform aggregates on multiple sub-sets of data */
+
+SELECT column_1, COUNT(*) AS aggregate_1
+FROM table_1
+GROUP BY column_1;                      /* this will produce aggregate counts for each distinct column_1 value */
+
+/* apparently every column other than aggregate columns must be present in the GROUP BY clause as well */
+/* you can GROUP BY more than one column, which produces nesting. */
+/* you can group by column names or expressions. If grouping by expressions, you can't use aliases created in the select. */
+/* usually DBMSs don't allow GROUP BY with variable length data types (such as strings) */
+/* NULL is treated like any other group by the GROUP BY clause */
+/* some DBMSs (like MS SQL) support an ALL keyword within the GROUP BY statement, refer to documentation for more details */
+____________________________________________________________________
+/* HAVING works identical to WHERE, including with wildcard usage. It just filters groups instead of individual entries. */
+
+SELECT column_1, COUNT(*) AS aggregate_1
+FROM table_1
+GROUP BY column_1
+HAVING COUNT(*) > 10;
+
+/* Note that WHERE filters before grouping occurs, while HAVING filters afterwards. Thus WHERE can alter how groups are divided up */
+
+SELECT column_1, COUNT(*) AS aggregate_1
+FROM table_1
+WHERE NOT column_2 IS NULL          /* notice again that a column here is used that wasn't specified in the SELECT */
+GROUP BY column_1                   /* GROUP BY contains only those columns specified within the SELECT */
+HAVING COUNT(*) > 10;
+
+/* some DBMSs allow HAVING used by itself, where it will act just like a WHERE clause, but this is bad programming practice */
+____________________________________________________________________
+The order to use these various SELECT clauses in is:
+  SELECT
+  FROM
+  WHERE
+  GROUP BY
+  HAVING
+  ORDER BY
+____________________________________________________________________
+
+-REREAD CHAPTERS 11 - 14 & TAKE NOTES ON THEM
+
+
+
+
+
+____________________________________________________________________
+/* 3 kinds of insertions: insert a full row, insert a partial row, and insert results from a query */
+/* the following inserts a full row. Columns are populated in order, and must be given a value or NULL (if allowed) */
+
+INSERT INTO table_1         /* in some SQL implementations INTO is optional, but its use is good coding practice */
+VALUES('attribute_1', 'attribute_2', NULL, 'attribute_4');
+
+/* the above assumes you know the column order and that it won't change. Listing the columns is a safer way */
+INSERT INTO table_1(column_1, column_2, column_3, column_4)
+VALUES('attribute_1', 'attribute_2', NULL, 'attribute_4');
+
+/* when listing columns, you can omit certain columns if the field may be NULL or has a default value */
+INSERT INTO table_1(column_1, column_4)
+VALUES('attribute_1', 'attribute_4');
+
+/* to insert into a table multiple query results from another table, use an INSERT SELECT */
+/* column positions are used here, not column names. there is no requirement that the table names match between INSERT and SELECT */
+/* be wary of duplicate primary keys while doing this */
+
+INSERT INTO table_1(column_1, column_2, column_3, column_4)
+SELECT column_1, column_2, column_3, column_4
+FROM table_2
+WHERE column_1 > 10;
+____________________________________________________________________
+/* SELECT INTO exports data to a table, potentially overwriting any old data (depending on the DBMS). In contrast, INSERT SELECT imports and appends data */
+/* generally this operation is useful for creating a temporary table for code testing */
+SELECT *
+INTO new_table
+FROM table_1;
+
+/* MariaDB, MySQL, Oracle, Postgres, and SQLite instead use CREATE TABLE: */
+CREATE TABLE new_table AS
+SELECT * FROM table_1;
+
+/* DB2 does not support SELECT INTO or CREATE TABLE */
+____________________________________________________________________
