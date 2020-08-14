@@ -57,12 +57,12 @@
 
 	<div id="program_wrapper">
 
-		<div class="resize_services_pane" id="services_pane">
+		<div class="resize_services_pane" id="services_pane"> 
 			<input type="image" src="images/maximize_button_4.png" class="minmax_services_button" id="max_servicespane_button" />
 			<input type="image" src="images/minimize_button_4.png" class="minmax_services_button" id="min_servicespane_button" />
 			<input id="service_input" value="https://sampleserver6.arcgisonline.com/arcgis/rest/services/">
 			<select id="service_selector"></select>
-			<div id="layers_grid"></div>
+			<div id="layers_grid"></div> 
 		</div>
 
 		<main id="main">
@@ -480,15 +480,12 @@ function draggableBoxListener(event) {				// called whenever the box is dragged,
         target.setAttribute('data-x', x);												// update the position attributes
 	    target.setAttribute('data-y', y);
     }
-    console.log("EVENT: ", event, "TARGET: ", target); 
-
-	
 }
 
 // ResizeObserver is capable of watching for changes in the resizable boxes size, and swapping the minimize / maximize buttons accordingly 
 const resize_table_observer = new ResizeObserver(entries => {
 	for (let entry of entries){ 
-		if (entry.contentBoxSize){ 
+		if (entry.contentBoxSize && entry.contentBoxSize.inlineSize != undefined){ 
 			if (entry.contentBoxSize.blockSize > 35){ 
 				min_table_button.style.display = "block";
 				max_table_button.style.display = "none";
@@ -498,6 +495,16 @@ const resize_table_observer = new ResizeObserver(entries => {
 				max_table_button.style.display = "block";
 			}
 		}
+        else if (entry.contentBoxSize){
+            if (entry.contentBoxSize[0].blockSize > 35){ 
+				min_table_button.style.display = "block";
+				max_table_button.style.display = "none";
+			}
+			else{ 
+				min_table_button.style.display = "none";
+				max_table_button.style.display = "block";
+			}
+        }
 		else{
 			if (entry.contentRect.bottom > 35){ 
 				min_table_button.style.display = "block";
@@ -512,19 +519,38 @@ const resize_table_observer = new ResizeObserver(entries => {
 });
 const resize_servicepane_observer = new ResizeObserver(entries => {
 	for (let entry of entries){ 
-		if (entry.contentBoxSize){ 
-			if (entry.contentBoxSize.inlineSize > 50){ 
-				min_servicespane_button.style.display = "block";
-				max_servicespane_button.style.display = "none";
-				service_selector.style.display = service_input.style.display = "block";
+		if (entry.contentBoxSize && entry.contentBoxSize.inlineSize != undefined){
+            if (entry.contentBoxSize.inlineSize > 50){
+                min_servicespane_button.style.display = "block";
+                max_servicespane_button.style.display = "none";
+                service_selector.style.display = "block"; 
+                service_input.style.display = "block";
                 layers_grid.style.display = "grid"; 
-			}
-			else{ 
-				min_servicespane_button.style.display = "none";
-				max_servicespane_button.style.display = "block";
-				service_selector.style.display = service_input.style.display = layers_grid.style.display = "none";
-			}
+            }
+            else{
+                min_servicespane_button.style.display = "none";
+                max_servicespane_button.style.display = "block";
+                service_selector.style.display = "none"; 
+                service_input.style.display = "none"; 
+                layers_grid.style.display = "none";
+            }
 		}
+        else if (entry.contentBoxSize){
+            if (entry.contentBoxSize[0].inlineSize > 50){
+                min_servicespane_button.style.display = "block";
+                max_servicespane_button.style.display = "none";
+                service_selector.style.display = "block"; 
+                service_input.style.display = "block";
+                layers_grid.style.display = "grid"; 
+            }
+            else{
+                min_servicespane_button.style.display = "none";
+                max_servicespane_button.style.display = "block";
+                service_selector.style.display = "none"; 
+                service_input.style.display = "none"; 
+                layers_grid.style.display = "none";
+            }
+        }
 		else{ 
 			if (entry.contentRect.right > 50){ 
 				min_servicespane_button.style.display = "block";
@@ -828,21 +854,20 @@ function(eMap, eMapView, eHome, eZoom, eTileLayer, eRequest, eCollection, eLegen
             url: "http://server.arcgisonline.com/arcgis/rest/services/World_Shaded_Relief/MapServer", 
             title: "world_physical_basemap"})], 
 		title: "historically accurate", 
-		id: "brownmap", 
+		id: "brownmap",
 		thumbnailUrl: "images/brownmap_icon.PNG"
 	});
     // create basemap (green one, looks better than others)
 	greenmap = new Basemap({
 		baseLayers: [new TileLayer({
             url: "http://server.arcgisonline.com/arcgis/rest/services/World_Physical_Map/MapServer", 
-            title: "world_physical_basemap"}
-        )],	
+            title: "world_physical_basemap"})],	
         title: "natural earth", 
         id: "greenmap", 
 		thumbnailUrl: "images/greenmap_icon.PNG"
 	});
 	// load the default basemap 
-	map_obj = new Map({basemap: brownmap});
+	map_obj = new Map({basemap: greenmap});
 	
 	// create view - the view is like the lense through which you see the map
 	map_view = new MapView({
@@ -899,7 +924,7 @@ function(eMap, eMapView, eHome, eZoom, eTileLayer, eRequest, eCollection, eLegen
     // toggles between 2 baemaps - if you need more than 2 basemaps you have to use the basemap gallery widget 
 	var basemapToggle = new BasemapToggle({
 		view: map_view,
-		nextBasemap: greenmap,
+		nextBasemap: brownmap,
 		container: "toggle_widget",
 		titleVisible: false
 	});
@@ -1048,9 +1073,20 @@ function load_service(first_time){
             return a.layerId - b.layerId; 
         });
 
+        // you need to do cleanup of old feature layres and so on here 
+
+        grid_divs_list = [];
+        next_grid_line = 1; 
+        let child_count = layers_grid.childElementCount;
+        for (let y = 0; y < child_count; y++){
+            layers_grid.removeChild(layers_grid.childNodes[0]); 
+        }
+        console.log("LAYER IDS LENGTH: ", layer_ids.length); 
+        console.log("feature_layers_array: ", feature_layers_array); 
+
         for (let x = 0; x < layer_ids.length; x++){
             let layer_id = layer_ids[x];
-            let feature_layer = feature_layers_array[x]; 
+            let feature_layer = feature_layers_array[x];
             let checkbox = document.createElement("input");
 
             checkbox.type = "checkbox";								// set new checkbox's attributes 
@@ -1087,7 +1123,7 @@ function load_service(first_time){
             new_div.append(checkbox); 
             new_div.append(checkbox_label); 
             new_div.style.overflow = "hidden";
-            new_div.style.padding = "0px";  
+            new_div.style.padding = "0px";
 
             grid_divs_list.push(new_div); 
             layers_grid.append(new_div);
