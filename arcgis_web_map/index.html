@@ -952,6 +952,7 @@ function(eMap, eMapView, eHome, eZoom, eTileLayer, eRequest, eCollection, eLegen
 function populate_services(){
 	Request(base_url + "?f=json", {responseType: "json"})
 	.then(function(response){
+        console.log("RESPONSE: ", response); 
 		let server_json = response.data;
 		// add event listeners so that when a new service is selected - fetch that service, render it on the map, & fill the layers pane with checkboxes for its layers
 		service_selector.addEventListener("change", function(){
@@ -964,12 +965,15 @@ function populate_services(){
 
 		// populate the drop down list of services with all available services names
 		for (var x = 0; x < server_json.services.length; x++){
-			let new_option = document.createElement("option");
-			new_option.textContent = server_json.services[x].name;
-            if (new_option.textContent == default_service){
-                new_option.selected = true; 
+            let service_type = server_json.services[x].type; 
+            if (service_type == "FeatureServer"){
+                let new_option = document.createElement("option");
+                new_option.textContent = server_json.services[x].name;
+                if (new_option.textContent == default_service){
+                    new_option.selected = true; 
+                }
+                service_selector.appendChild(new_option);
             }
-			service_selector.appendChild(new_option);
 		}
 		load_service(true);
         lower_panel_wrapper.style.height = "340px";
@@ -1020,11 +1024,12 @@ function load_service(first_time){
         for (let x = 0; x < total_layers; x++){
             let layer_query_url = server_query_url + layer_ids[x];
             
-            let promise = Request(layer_query_url + json_query).then(function(layer_json_response){
-                
+            let promise = Request(layer_query_url + json_query)
+            .then(function(layer_json_response){
                 let fields = layer_json_response.data.fields; 
                 let popup_field_infos = [];
                 let popup_field_names = []; 
+
                 for (let y = 0; y < fields.length; y++){
                     popup_field_infos.push(new FieldInfo({
                         fieldName: fields[y].name,
@@ -1032,8 +1037,7 @@ function load_service(first_time){
                         visible: true, 
                         isEditable: true
                     }));
-                    popup_field_names.push(fields[y].name); 
-                    
+                    popup_field_names.push(fields[y].name);
                 }
                 let display_field = layer_json_response.data.displayField; 
 
@@ -1076,7 +1080,7 @@ function load_service(first_time){
         // you need to do cleanup of old feature layres and so on here 
 
         grid_divs_list = [];
-        next_grid_line = 1; 
+        next_grid_line = 1;
         let child_count = layers_grid.childElementCount;
         for (let y = 0; y < child_count; y++){
             layers_grid.removeChild(layers_grid.childNodes[0]); 
