@@ -1,1 +1,0 @@
-multiple methods of using OAUTH are demoed in this folder - using requests, twitter, & tweepy 
